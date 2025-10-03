@@ -1,24 +1,33 @@
-# app.py
 import os
 import re
+import io
+import sys
+import uuid
+import shutil
 import cv2
 import numpy as np
 from datetime import datetime
 from PIL import Image
-import gradio as gr
+from flask import Flask, request, render_template, url_for, redirect
 from ultralytics import YOLO
 import pytesseract
 
 # ---------- CONFIG ----------
-pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+# Prefer explicit tesseract path if present (Spaces installs via packages.txt)
+if shutil.which("tesseract"):
+    pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
+else:
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 ROOT = os.path.dirname(__file__)
 MODEL_PATH = os.path.join(ROOT, "best.pt")
-os.makedirs(os.path.join(ROOT, "outputs"), exist_ok=True)
+UPLOAD_FOLDER = os.path.join(ROOT, "static", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Make sure this matches your model's class ordering
 CLASS_MAP = {0: "aadhaar_card", 1: "aadhaar_number", 2: "dob", 3: "name", 4: "photo"}
 
-# ---------- Verhoeff ----------
+# ---------- Verhoeff (Aadhaar) ----------
 verhoeff_table_d = [
     [0,1,2,3,4,5,6,7,8,9],
     [1,2,3,4,0,6,7,8,9,5],
@@ -49,7 +58,19 @@ def verhoeff_check(num):
     return c == 0
 
 # ---------- Utilities ----------
+ALLOWED_EXT = {"png", "jpg", "jpeg"}
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
+
 def tesseract_ocr(img):
+    """
+    img: BGR numpy array
+    returns recognized text (string) or raises RuntimeError if tesseract missing
+    """
+    # ensure tesseract binary available
+    if not shutil.which(pytesseract.pytesseract.tesseract_cmd) and not shutil.which("tesseract"):
+        raise RuntimeError("Tesseract binary not found on the system. Install tesseract-ocr (packages.txt for Spaces).")
     try:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     except Exception:
@@ -86,37 +107,66 @@ def validate_aadhaar(num):
     if len(digits) != 12: return "❌ Invalid length"
     return "✅ Valid" if verhoeff_check(digits) else "❌ Invalid (Verhoeff failed)"
 
-# ---------- Load model ----------
+# ---------- Load YOLO model ----------
 print("Loading YOLO model from:", MODEL_PATH)
+model = None
 try:
     model = YOLO(MODEL_PATH)
     print("YOLO model loaded.")
 except Exception as e:
-    print("Warning: could not load YOLO model:", e)
+    print("Warning: YOLO model not loaded:", e, file=sys.stderr)
     model = None
 
-# ---------- Processing ----------
+# ---------- Helpers to open images ----------
 def pil_to_cv2(image: Image.Image):
-    arr = np.array(image.convert("RGB"))
-    return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
+    image = image.convert("RGB")
+    arr = np.array(image)
+    bgr = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
+    return bgr
 
-def process_image(file_obj):
+def open_input_image(input_obj):
+    """
+    Accepts:
+      - filepath (str)
+      - file-like (has .read())
+      - bytes
+    Returns PIL.Image
+    """
+    if input_obj is None:
+        raise ValueError("No input provided")
+    if isinstance(input_obj, str):
+        return Image.open(input_obj)
+    if hasattr(input_obj, "read"):
+        data = input_obj.read()
+        if isinstance(data, bytes):
+            return Image.open(io.BytesIO(data))
+        return Image.open(io.BytesIO(data))
+    if isinstance(input_obj, (bytes, bytearray)):
+        return Image.open(io.BytesIO(input_obj))
+    raise ValueError(f"Unsupported image input type: {type(input_obj)}")
+
+# ---------- Core processing ----------
+def process_image_file(file_stream_or_path):
+    """Returns dict: extracted, validations, annotated_path, photo_path (if any)"""
     try:
-        image = Image.open(file_obj)
+        pil_image = open_input_image(file_stream_or_path)
     except Exception as e:
         return {"error": f"Cannot open image: {e}"}
-    img = pil_to_cv2(image)
+
+    img = pil_to_cv2(pil_image)
     h, w = img.shape[:2]
+
     extracted = {"aadhaar_number": "", "dob": "", "name": "", "photo": ""}
 
     if model is None:
-        return {"error": "YOLO model not loaded. Ensure best.pt is in repo root."}
+        return {"error": "YOLO model not loaded. Ensure best.pt is present in repo root."}
 
     try:
         results = model(img)
     except Exception as e:
         return {"error": f"Model inference error: {e}"}
 
+    # parse detections
     for r in results:
         boxes = getattr(r, "boxes", None)
         if boxes is None:
@@ -127,6 +177,7 @@ def process_image(file_obj):
         except Exception:
             xyxy = np.array(boxes.xyxy)
             cls_ids = np.array(boxes.cls).astype(int)
+
         for (x1, y1, x2, y2), cls_id in zip(xyxy, cls_ids):
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
             x1, y1 = max(0, x1), max(0, y1)
@@ -135,23 +186,35 @@ def process_image(file_obj):
                 continue
             crop = img[y1:y2, x1:x2].copy()
             label = CLASS_MAP.get(int(cls_id), f"class_{cls_id}")
+
             if label == "aadhaar_number":
-                text = tesseract_ocr(crop)
+                try:
+                    text = tesseract_ocr(crop)
+                except Exception as e:
+                    return {"error": f"Tesseract OCR error: {e}"}
                 digits = re.sub(r"[^0-9]", "", text)
                 if len(digits) == 12:
                     extracted["aadhaar_number"] = digits
             elif label in ("dob", "name"):
-                text = tesseract_ocr(crop)
+                try:
+                    text = tesseract_ocr(crop)
+                except Exception as e:
+                    return {"error": f"Tesseract OCR error: {e}"}
                 text = re.sub(r"[^A-Za-z0-9\-/ ]", " ", text).strip()
                 if len(text) > len(extracted.get(label, "")):
                     extracted[label] = text
             elif label == "photo":
                 rel_photo = f"photo_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-                out_photo = os.path.join(ROOT, "outputs", rel_photo)
+                out_photo = os.path.join(UPLOAD_FOLDER, rel_photo)
                 cv2.imwrite(out_photo, crop)
                 extracted["photo"] = out_photo
 
-    full_text = tesseract_ocr(img)
+    # fallback full OCR
+    try:
+        full_text = tesseract_ocr(img)
+    except Exception as e:
+        return {"error": f"Tesseract OCR error: {e}"}
+
     if not extracted["aadhaar_number"]:
         m = re.search(r"\b\d{4}\s?\d{4}\s?\d{4}\b", full_text)
         if m:
@@ -177,6 +240,7 @@ def process_image(file_obj):
         "dob": validate_dob(extracted.get("dob")),
     }
 
+    # annotated image
     annotated = img.copy()
     try:
         for r in results:
@@ -197,56 +261,64 @@ def process_image(file_obj):
     annotated_rgb = cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB)
     annotated_pil = Image.fromarray(annotated_rgb)
 
+    # save annotated image
+    ann_name = f"annotated_{uuid.uuid4().hex}.jpg"
+    ann_path = os.path.join(UPLOAD_FOLDER, ann_name)
+    annotated_bgr = cv2.cvtColor(np.array(annotated_pil), cv2.COLOR_RGB2BGR)
+    cv2.imwrite(ann_path, annotated_bgr)
+
     response = {
         "extracted": extracted,
         "validations": validations,
-        "annotated_pil": annotated_pil,
+        "annotated_path": ann_path,
+        "photo_path": extracted.get("photo")
     }
-    if extracted.get("photo"):
-        try:
-            response["photo_pil"] = Image.open(extracted["photo"])
-        except Exception:
-            response["photo_pil"] = None
 
     return response
 
-# ---------- Gradio UI ----------
-custom_css = open("style.css").read() if os.path.exists("style.css") else None
+# ---------- Flask app ----------
+from flask import Flask, render_template
+app = Flask(__name__)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-with gr.Blocks(css=custom_css, title="Aadhaar Card Verification System") as demo:
-    gr.HTML("<div class='container'><h1>Aadhaar Card Verification System</h1><p class='subtitle'>Upload an Aadhaar card image for validation</p></div>")
+@app.route("/", methods=["GET"])
+def index_route():
+    return render_template("index.html")
 
-    with gr.Row():
-        with gr.Column():
-            file_input = gr.File(label="📂 Choose Aadhaar File", file_types=["image"], type="filepath")
-            scan_btn = gr.Button("🔍 Scan Aadhaar", elem_id="scanButton")
-            result_box = gr.Markdown("", elem_id="results")
-        with gr.Column():
-            annotated_img = gr.Image(label="Detected / Annotated", type="pil")
-            photo_img = gr.Image(label="Aadhaar Photo (if detected)", type="pil")
+@app.route("/scan", methods=["POST"])
+def scan_route():
+    if "file" not in request.files:
+        return render_template("index.html", error="No file part in request")
+    file = request.files["file"]
+    if file.filename == "":
+        return render_template("index.html", error="No file selected")
+    if not allowed_file(file.filename):
+        return render_template("index.html", error="Invalid file type")
 
-    def on_scan(file):
-        if file is None:
-            return None, None, "**Error:** Please upload an image file."
-        out = process_image(file.name if hasattr(file, "name") else file)
-        if isinstance(out, dict) and out.get("error"):
-            return None, None, f"**Error:** {out.get('error')}"
-        extracted = out["extracted"]
-        validations = out["validations"]
-        aadhaar_num = extracted.get("aadhaar_number") or "❌ Missing"
-        name = extracted.get("name") or "❌ Missing"
-        dob = extracted.get("dob") or "❌ Missing"
-        results_md = f"""
-### Extracted Data
-- **Aadhaar Number:** `{aadhaar_num}` — **{validations['aadhaar_number']}**
-- **Name:** `{name}` — **{validations['name']}**
-- **DOB:** `{dob}` — **{validations['dob']}**
-"""
-        return out.get("annotated_pil"), out.get("photo_pil"), results_md
+    # save uploaded file
+    fname = f"upload_{uuid.uuid4().hex}.jpg"
+    save_path = os.path.join(UPLOAD_FOLDER, fname)
+    file.save(save_path)
 
-    scan_btn.click(on_scan, inputs=[file_input], outputs=[annotated_img, photo_img, result_box])
+    # process
+    result = process_image_file(save_path)
+    if isinstance(result, dict) and result.get("error"):
+        return render_template("index.html", error=result.get("error"))
 
-    gr.HTML("<footer>© 2025 Aadhaar Verification System | Secure Identity Validation</footer>")
+    extracted = result["extracted"]
+    validations = result["validations"]
+    annotated_rel = os.path.relpath(result["annotated_path"], ROOT)
+    photo_rel = os.path.relpath(result.get("photo_path") or "", ROOT)
+
+    return render_template(
+        "result.html",
+        input_image=url_for('static', filename=f"uploads/{fname}"),
+        annotated_image=url_for('static', filename=f"{os.path.basename(annotated_rel)}"),
+        photo_image=(url_for('static', filename=f"{os.path.basename(photo_rel)}") if photo_rel else None),
+        extracted=extracted,
+        validations=validations
+    )
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    # Port 7860 for Hugging Face Spaces
+    app.run(host="0.0.0.0", port=7860)
