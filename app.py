@@ -246,7 +246,7 @@ with gr.Blocks(css=open("style.css").read() if os.path.exists("style.css") else 
     gr.HTML("<div style='text-align:center; margin-top:16px;'><h1>Aadhaar Card Verification System</h1><p class='subtitle'>Upload an Aadhaar card image for validation</p></div>")
     with gr.Row():
         with gr.Column(scale=1):
-            file_input = gr.File(label="📂 Choose Aadhaar File (jpg, png)", file_types=["image"], type="file")
+            file_input = gr.File(label="📂 Choose Aadhaar File (jpg, png)", file_types=["image"], type="filepath")
             scan_btn = gr.Button("🔍 Scan Aadhaar", elem_id="scanButton")
             status_text = gr.Markdown("")
         with gr.Column(scale=1):
