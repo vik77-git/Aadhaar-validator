@@ -1,0 +1,9 @@
+/* style.css - used by Gradio Blocks when available */
+body { font-family: Inter, sans-serif; }
+h1 { color: #1a73e8; font-weight: 600; }
+.subtitle { font-size: 14px; color: #555; margin-bottom: 20px; }
+#scanButton { background: #34a853 !important; color: white !important; padding: 10px 22px; border-radius: 8px; font-weight: 600; }
+#scanButton:hover { opacity: 0.95; }
+.gradio-container { background: #f8f9fb; padding: 18px; border-radius: 12px; }
+footer { border-top: 3px solid #0c5adb; border-radius: 6px; }
+#resultsDiv { background: #fafafa; padding: 14px; border-radius: 8px; border: 1px solid #e0e0e0; }
