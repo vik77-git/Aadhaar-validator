@@ -1,26 +1,30 @@
-# Aadhaar Validator (Flask + YOLO + Tesseract)
+---
+title: Aadhaar Validator
+emoji: 🪪
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_file: app.py
+pinned: false
+---
 
-Aadhaar Card Verification System using Flask, YOLOv8, and Tesseract OCR.
+# Aadhaar Card Verification System
 
-## Included files
-- `app.py` — Flask server (YOLO inference, OCR, Verhoeff validation)
-- `requirements.txt` — Python dependencies
-- `packages.txt` — system packages (Tesseract) for Hugging Face Spaces
-- `templates/index.html` — upload UI
-- `templates/result.html` — results UI
-- `static/style.css` — professional styling
-- `static/uploads/` — created at runtime for images
-- `best.pt` — **place your YOLO model here (required)**
+This Space verifies Aadhaar card details using **YOLOv8 (Ultralytics)** for detection and **Tesseract OCR** for text extraction.  
+It validates:
+- Aadhaar Number (with Verhoeff checksum)  
+- Name  
+- Date of Birth  
+- Extracts Aadhaar Photo  
 
-## Deploy on Hugging Face Spaces
-1. Create a new Space (choose **"Other"** / default settings).
-2. Upload all files above and **put `best.pt` in the repo root**.
-3. The Space will install Python packages from `requirements.txt` and apt packages from `packages.txt`.
-4. The Flask app listens on port **7860**; Spaces will expose it automatically.
+## How it Works
+1. Upload an Aadhaar card image (`.jpg`, `.jpeg`, `.png`).  
+2. The system detects regions (name, DOB, Aadhaar number, photo).  
+3. OCR extracts text.  
+4. Aadhaar number is validated with Verhoeff checksum.  
+5. Results and detected photo are displayed.  
 
-## Run locally
+## Run Locally
 ```bash
 pip install -r requirements.txt
-# On Ubuntu:
-sudo apt-get update && sudo apt-get install -y tesseract-ocr libtesseract-dev
 python app.py
