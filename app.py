@@ -1,7 +1,6 @@
 # app.py
 import os
 import re
-import io
 import cv2
 import numpy as np
 from datetime import datetime
@@ -11,17 +10,15 @@ from ultralytics import YOLO
 import pytesseract
 
 # ---------- CONFIG ----------
-# On Hugging Face Spaces, tesseract is available at /usr/bin/tesseract after apt install
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 ROOT = os.path.dirname(__file__)
-MODEL_PATH = os.path.join(ROOT, "best.pt")  # put your YOLO best.pt in repo root
+MODEL_PATH = os.path.join(ROOT, "best.pt")
 os.makedirs(os.path.join(ROOT, "outputs"), exist_ok=True)
 
-# Make sure this matches the classes used during YOLO training
 CLASS_MAP = {0: "aadhaar_card", 1: "aadhaar_number", 2: "dob", 3: "name", 4: "photo"}
 
-# ---------- Verhoeff (Aadhaar) ----------
+# ---------- Verhoeff ----------
 verhoeff_table_d = [
     [0,1,2,3,4,5,6,7,8,9],
     [1,2,3,4,0,6,7,8,9,5],
@@ -52,21 +49,12 @@ def verhoeff_check(num):
     return c == 0
 
 # ---------- Utilities ----------
-ALLOWED_EXT = {"png", "jpg", "jpeg"}
-
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
-
 def tesseract_ocr(img):
-    # img is a BGR numpy array
     try:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     except Exception:
-        # if single-channel already
         gray = img
-    # adaptive thresholding to help OCR
     _, th = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    # Convert to PIL for pytesseract reliability
     pil_img = Image.fromarray(th)
     text = pytesseract.image_to_string(pil_img, config="--psm 6")
     return text.strip()
@@ -100,7 +88,6 @@ def validate_aadhaar(num):
 
 # ---------- Load model ----------
 print("Loading YOLO model from:", MODEL_PATH)
-model = None
 try:
     model = YOLO(MODEL_PATH)
     print("YOLO model loaded.")
@@ -110,56 +97,44 @@ except Exception as e:
 
 # ---------- Processing ----------
 def pil_to_cv2(image: Image.Image):
-    image = image.convert("RGB")
-    arr = np.array(image)
-    # PIL -> RGB, convert to BGR for OpenCV
-    bgr = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
-    return bgr
+    arr = np.array(image.convert("RGB"))
+    return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
 
 def process_image(file_obj):
-    # file_obj is a bytes-like / file buffer from Gradio
     try:
         image = Image.open(file_obj)
     except Exception as e:
         return {"error": f"Cannot open image: {e}"}
     img = pil_to_cv2(image)
     h, w = img.shape[:2]
-
     extracted = {"aadhaar_number": "", "dob": "", "name": "", "photo": ""}
 
     if model is None:
         return {"error": "YOLO model not loaded. Ensure best.pt is in repo root."}
 
-    # run inference
     try:
-        results = model(img)  # ultralytics YOLO: pass numpy image
+        results = model(img)
     except Exception as e:
         return {"error": f"Model inference error: {e}"}
 
-    # parse detections
     for r in results:
         boxes = getattr(r, "boxes", None)
         if boxes is None:
             continue
-        # boxes.xyxy: tensor Nx4, boxes.cls: tensor N
         try:
-            xyxy = boxes.xyxy.cpu().numpy()  # (N,4)
+            xyxy = boxes.xyxy.cpu().numpy()
             cls_ids = boxes.cls.cpu().numpy().astype(int)
         except Exception:
-            # fallback if data already numpy
             xyxy = np.array(boxes.xyxy)
             cls_ids = np.array(boxes.cls).astype(int)
-
         for (x1, y1, x2, y2), cls_id in zip(xyxy, cls_ids):
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-            # clamp
             x1, y1 = max(0, x1), max(0, y1)
             x2, y2 = min(w - 1, x2), min(h - 1, y2)
             if x2 <= x1 or y2 <= y1:
                 continue
             crop = img[y1:y2, x1:x2].copy()
             label = CLASS_MAP.get(int(cls_id), f"class_{cls_id}")
-
             if label == "aadhaar_number":
                 text = tesseract_ocr(crop)
                 digits = re.sub(r"[^0-9]", "", text)
@@ -168,17 +143,14 @@ def process_image(file_obj):
             elif label in ("dob", "name"):
                 text = tesseract_ocr(crop)
                 text = re.sub(r"[^A-Za-z0-9\-/ ]", " ", text).strip()
-                # prefer longer text
                 if len(text) > len(extracted.get(label, "")):
                     extracted[label] = text
             elif label == "photo":
-                # save the photo crop and return a path to display
                 rel_photo = f"photo_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
                 out_photo = os.path.join(ROOT, "outputs", rel_photo)
                 cv2.imwrite(out_photo, crop)
                 extracted["photo"] = out_photo
 
-    # fallback: full OCR on the entire image if missing fields
     full_text = tesseract_ocr(img)
     if not extracted["aadhaar_number"]:
         m = re.search(r"\b\d{4}\s?\d{4}\s?\d{4}\b", full_text)
@@ -205,9 +177,7 @@ def process_image(file_obj):
         "dob": validate_dob(extracted.get("dob")),
     }
 
-    # prepare display image (annotate detections)
     annotated = img.copy()
-    # draw boxes & labels
     try:
         for r in results:
             boxes = getattr(r, "boxes", None)
@@ -232,7 +202,6 @@ def process_image(file_obj):
         "validations": validations,
         "annotated_pil": annotated_pil,
     }
-    # convert saved photo path to PIL if exists
     if extracted.get("photo"):
         try:
             response["photo_pil"] = Image.open(extracted["photo"])
@@ -242,27 +211,26 @@ def process_image(file_obj):
     return response
 
 # ---------- Gradio UI ----------
-with gr.Blocks(css=open("style.css").read() if os.path.exists("style.css") else None, title="Aadhaar Card Verification System") as demo:
-    gr.HTML("<div style='text-align:center; margin-top:16px;'><h1>Aadhaar Card Verification System</h1><p class='subtitle'>Upload an Aadhaar card image for validation</p></div>")
+custom_css = open("style.css").read() if os.path.exists("style.css") else None
+
+with gr.Blocks(css=custom_css, title="Aadhaar Card Verification System") as demo:
+    gr.HTML("<div class='container'><h1>Aadhaar Card Verification System</h1><p class='subtitle'>Upload an Aadhaar card image for validation</p></div>")
+
     with gr.Row():
-        with gr.Column(scale=1):
-            file_input = gr.File(label="📂 Choose Aadhaar File (jpg, png)", file_types=["image"], type="filepath")
+        with gr.Column():
+            file_input = gr.File(label="📂 Choose Aadhaar File", file_types=["image"], type="filepath")
             scan_btn = gr.Button("🔍 Scan Aadhaar", elem_id="scanButton")
-            status_text = gr.Markdown("")
-        with gr.Column(scale=1):
+            result_box = gr.Markdown("", elem_id="results")
+        with gr.Column():
             annotated_img = gr.Image(label="Detected / Annotated", type="pil")
             photo_img = gr.Image(label="Aadhaar Photo (if detected)", type="pil")
-    # results area
-    aadhaar_text = gr.Markdown("", elem_id="resultsDiv")
 
     def on_scan(file):
         if file is None:
-            return gr.update(), gr.update(), gr.update(value="**Error:** Please upload an image file.")
-        # Process
+            return None, None, "**Error:** Please upload an image file."
         out = process_image(file.name if hasattr(file, "name") else file)
         if isinstance(out, dict) and out.get("error"):
             return None, None, f"**Error:** {out.get('error')}"
-        # Prepare results markdown
         extracted = out["extracted"]
         validations = out["validations"]
         aadhaar_num = extracted.get("aadhaar_number") or "❌ Missing"
@@ -270,15 +238,15 @@ with gr.Blocks(css=open("style.css").read() if os.path.exists("style.css") else 
         dob = extracted.get("dob") or "❌ Missing"
         results_md = f"""
 ### Extracted Data
-- **Aadhaar Number:** `{aadhaar_num}`  — **{validations['aadhaar_number']}**
-- **Name:** `{name}`  — **{validations['name']}**
-- **DOB:** `{dob}`  — **{validations['dob']}**
+- **Aadhaar Number:** `{aadhaar_num}` — **{validations['aadhaar_number']}**
+- **Name:** `{name}` — **{validations['name']}**
+- **DOB:** `{dob}` — **{validations['dob']}**
 """
         return out.get("annotated_pil"), out.get("photo_pil"), results_md
 
-    scan_btn.click(on_scan, inputs=[file_input], outputs=[annotated_img, photo_img, aadhaar_text])
+    scan_btn.click(on_scan, inputs=[file_input], outputs=[annotated_img, photo_img, result_box])
 
-    gr.HTML("<footer style='text-align:center; margin-top:18px; padding:10px; background:#1a73e8; color:#fff'>© 2025 Aadhaar Verification System | Secure Identity Validation</footer>")
+    gr.HTML("<footer>© 2025 Aadhaar Verification System | Secure Identity Validation</footer>")
 
 if __name__ == "__main__":
     demo.launch(server_name="0.0.0.0", server_port=7860)
