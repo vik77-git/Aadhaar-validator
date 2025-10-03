@@ -14,7 +14,6 @@
     <h1>Aadhaar Card Verification System</h1>
     <p class="subtitle">Upload an Aadhaar card image for validation</p>
 
-    <!-- Remove inline error box, we'll use SweetAlert instead -->
     {% if error %}
     <script>
       document.addEventListener("DOMContentLoaded", function() {
@@ -36,6 +35,22 @@
       <p id="fileName" class="filename">No file chosen</p>
       <button type="submit" id="scanButton">🔍 Scan Aadhaar</button>
     </form>
+
+    {% if extracted %}
+    <div class="results-card">
+      <h3>Extracted Aadhaar Data</h3>
+      <p><strong>Aadhaar Number:</strong> {{ extracted.aadhaar_number }} — <span class="status">{{ validations.aadhaar_number }}</span></p>
+      <p><strong>Name:</strong> {{ extracted.name }} — <span class="status">{{ validations.name }}</span></p>
+      <p><strong>DOB:</strong> {{ extracted.dob }} — <span class="status">{{ validations.dob }}</span></p>
+
+      {% if photo_image %}
+      <div class="photo-section">
+        <h4>Detected Photo</h4>
+        <img src="{{ photo_image }}" alt="Aadhaar Photo">
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
 
   <footer>
@@ -55,7 +70,7 @@
       }
     });
 
-    // Prevent form submit if no file selected
+    // SweetAlert loading when scanning Aadhaar
     form.addEventListener('submit', function (e) {
       if (!fileInput.value) {
         e.preventDefault();
@@ -64,6 +79,15 @@
           title: 'No file selected',
           text: 'Please choose an Aadhaar card image before scanning.',
           confirmButtonColor: '#3085d6'
+        });
+      } else {
+        Swal.fire({
+          title: 'Scanning Aadhaar...',
+          text: 'Please wait while we process the image.',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
         });
       }
     });
