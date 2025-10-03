@@ -5,7 +5,8 @@ colorFrom: blue
 colorTo: green
 sdk: docker
 app_file: app.py
-pinned: false
+pinned: true
+license: apache-2.0
 ---
 
 # Aadhaar Card Verification System
