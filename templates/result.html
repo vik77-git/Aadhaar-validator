@@ -114,6 +114,69 @@
           <span>DOB:</span>
           <span>{{ extracted.dob or '—' }} — <span class="status">{{ validations.dob }}</span></span>
         </div>
+        <!-- Extracted Aadhaar Data Card -->
+        <div class="validity-card">
+          <h3>Extracted Aadhaar Data</h3>
+          <div class="validity-item">
+          <span class="label">Aadhaar Number:</span>
+          <span class="value">{{ extracted.aadhaar_number or '—' }}</span>
+          <span class="status">{{ validations.aadhaar_number }}</span>
+        </div>
+        <div class="validity-item">
+          <span class="label">Name:</span>
+          <span class="value">{{ extracted.name or '—' }}</span>
+          <span class="status">{{ validations.name }}</span>
+        </div>
+        <div class="validity-item">
+          <span class="label">DOB:</span>
+          <span class="value">{{ extracted.dob or '—' }}</span>
+          <span class="status">{{ validations.dob }}</span>
+        </div>
+      </div>
+
+      <style>
+      .validity-card {
+        border: 2px solid #1a73e8; /* professional blue border */
+        border-radius: 12px;
+        background-color: #fdfdfd;
+        padding: 20px 25px;
+        max-width: 400px;
+        margin: 0 auto 20px auto;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      }
+      .validity-card h3 {
+        margin-top: 0;
+        color: #1a73e8;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 15px;
+      }
+      .validity-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+        font-size: 1rem;
+        align-items: center;
+      }
+      .validity-item:last-child {
+        border-bottom: none;
+      }
+      .label {
+        font-weight: 500;
+        color: #333;
+      }
+      .value {
+        font-weight: 600;
+        color: #000;
+        margin: 0 8px;
+      }
+      .status {
+        font-weight: 600;
+        color: #1a73e8;
+      }
+</style>
+
 
         {% if photo_image %}
         <div class="photo-section">
