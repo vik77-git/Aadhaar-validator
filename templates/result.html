@@ -6,76 +6,86 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    .container {
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 20px;
+    body {
       font-family: 'Inter', sans-serif;
+      background-color: #f7f8fa;
+      margin: 0;
+      padding: 0;
     }
-
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
     h1 {
       text-align: center;
       color: #1a73e8;
-      margin-bottom: 24px;
+      margin-bottom: 30px;
     }
-
     .results-card {
-      background: #fff;
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      margin-bottom: 24px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      background-color: #fff;
+      padding: 25px 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
     }
-
-    .results-card h3 {
-      text-align: center;
-      margin-bottom: 18px;
-      color: #155ab6;
+    .image-section img {
+      max-width: 200px;
+      border-radius: 8px;
+      object-fit: contain;
+      border: 1px solid #ddd;
     }
-
-    .results-card p {
-      font-size: 16px;
+    .data-section {
+      flex: 1;
+    }
+    .data-section h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    .data-item {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
+      padding: 10px 0;
       border-bottom: 1px solid #eee;
+      font-size: 1rem;
     }
-
-    .results-card p:last-child {
+    .data-item:last-child {
       border-bottom: none;
     }
-
     .status {
       font-weight: 600;
     }
-
     .photo-section {
-      text-align: center;
       margin-top: 20px;
     }
-
     .photo-section img {
-      max-width: 100%;
-      max-height: 300px;
-      object-fit: contain;
-      border-radius: 12px;
+      max-width: 150px;
+      border-radius: 8px;
       border: 1px solid #ddd;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
     }
-
     .btn {
       display: inline-block;
-      padding: 12px 24px;
-      background: #1a73e8;
-      color: #fff;
-      text-decoration: none;
+      background-color: #1a73e8;
+      color: white;
+      padding: 10px 25px;
       border-radius: 8px;
+      text-decoration: none;
       font-weight: 600;
-      transition: background 0.3s;
+      margin-top: 25px;
     }
-
     .btn:hover {
-      background: #155ab6;
+      background-color: #1666c1;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 12px;
+      background-color: #1a73e8;
+      color: white;
+      border-radius: 0 0 8px 8px;
     }
   </style>
 </head>
@@ -83,35 +93,44 @@
   <div class="container">
     <h1>📊 Aadhaar Scan Results</h1>
 
-    <!-- Uploaded Aadhaar Image -->
-    <div class="photo-section">
-      <h4>Uploaded Aadhaar</h4>
-      <img src="{{ input_image }}" alt="Uploaded Aadhaar">
-    </div>
-
-    <!-- Extracted Data Card -->
     <div class="results-card">
-      <h3>Extracted Aadhaar Data</h3>
-      <p><span>Aadhaar Number:</span> <span>{{ extracted.aadhaar_number or '— —' }} — <span class="status">{{ validations.aadhaar_number }}</span></span></p>
-      <p><span>Name:</span> <span>{{ extracted.name or '— —' }} — <span class="status">{{ validations.name }}</span></span></p>
-      <p><span>DOB:</span> <span>{{ extracted.dob or '— —' }} — <span class="status">{{ validations.dob }}</span></span></p>
-
-      {% if photo_image %}
-      <div class="photo-section" style="margin-top:20px;">
-        <h4>Aadhaar Photo</h4>
-        <img src="{{ photo_image }}" alt="Detected Photo">
+      <!-- Uploaded Aadhaar Image -->
+      <div class="image-section">
+        <img src="{{ input_image }}" alt="Uploaded Aadhaar">
       </div>
-      {% endif %}
+
+      <!-- Extracted Data -->
+      <div class="data-section">
+        <h3>Extracted Aadhaar Data</h3>
+        <div class="data-item">
+          <span>Aadhaar Number:</span>
+          <span>{{ extracted.aadhaar_number or '—' }} — <span class="status">{{ validations.aadhaar_number }}</span></span>
+        </div>
+        <div class="data-item">
+          <span>Name:</span>
+          <span>{{ extracted.name or '—' }} — <span class="status">{{ validations.name }}</span></span>
+        </div>
+        <div class="data-item">
+          <span>DOB:</span>
+          <span>{{ extracted.dob or '—' }} — <span class="status">{{ validations.dob }}</span></span>
+        </div>
+
+        {% if photo_image %}
+        <div class="photo-section">
+          <h4>Detected Photo Crop</h4>
+          <img src="{{ photo_image }}" alt="Photo Crop">
+        </div>
+        {% endif %}
+      </div>
     </div>
 
     <div style="text-align:center;">
       <a href="/" class="btn">🔙 Back</a>
     </div>
-
   </div>
 
   <footer>
-    <p style="text-align:center; margin-top:20px;">© 2025 Aadhaar Verification System | Secure Identity Validation</p>
+    <p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
   </footer>
 </body>
 </html>
