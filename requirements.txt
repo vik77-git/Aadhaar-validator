@@ -1,0 +1,6 @@
+gradio>=3.23
+ultralytics>=8.0.100
+opencv-python-headless>=4.7.0
+numpy
+pillow
+pytesseract
