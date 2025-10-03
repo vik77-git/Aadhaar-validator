@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aadhaar Validator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Aadhaar Card Verification System</h1>
+    <p class="subtitle">Upload an Aadhaar card image for validation</p>
+
+    <!-- File Upload -->
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label class="custom-file-upload">
+        <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" required>
+        📂 Choose Aadhaar File
+      </label>
+      <p id="fileName" class="filename">No file chosen</p>
+      <button type="submit" id="scanButton">🔍 Scan Aadhaar</button>
+    </form>
+
+    <div id="results" class="results"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
+  </footer>
+
+  <!-- External JS -->
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
