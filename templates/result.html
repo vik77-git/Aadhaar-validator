@@ -44,7 +44,7 @@
       border-radius: 12px;
       background-color: #fff;
       padding: 20px 25px;
-      max-width: 400px;
+      max-width: 500px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       flex: 1 1 300px;
     }
@@ -57,11 +57,11 @@
     }
     .validity-item {
       display: flex;
+      align-items: center;
       justify-content: space-between;
       padding: 10px 0;
       border-bottom: 1px solid #eee;
       font-size: 1rem;
-      align-items: center;
     }
     .validity-item:last-child {
       border-bottom: none;
@@ -69,20 +69,22 @@
     .label {
       font-weight: 500;
       color: #333;
-      flex: 1;
+      min-width: 120px;
+      white-space: nowrap;
     }
     .value {
       font-weight: 600;
       color: #000;
-      margin: 0 8px;
       flex: 1;
-      text-align: left;
+      word-break: break-word; /* Allows long names to wrap if needed */
+      margin: 0 12px;
     }
     .status {
       font-weight: 600;
       color: #1a73e8;
-      flex: 1;
+      min-width: 90px;
       text-align: right;
+      white-space: nowrap;
     }
     .photo-section {
       text-align: center;
@@ -102,6 +104,7 @@
       border-radius: 8px;
       font-weight: 600;
       transition: 0.3s;
+      margin-top: 20px; /* move button up from footer */
     }
     .btn:hover {
       background-color: #1558b0;
@@ -118,7 +121,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>Aadhaar Scan Results</h1>
+    <h1>📊 Aadhaar Scan Results</h1>
 
     <div class="result-section">
       <!-- Uploaded Aadhaar Image -->
@@ -148,15 +151,16 @@
 
         {% if photo_image %}
         <div class="photo-section">
-          <h4>Aadhaar Photo</h4>
+          <h4>Detected Photo Crop</h4>
           <img src="{{ photo_image }}" alt="Detected Photo">
         </div>
         {% endif %}
       </div>
     </div>
 
-    <div style="text-align:center; margin-top:30px;">
-      <a href="/" class="btn">Back</a>
+    <!-- Back Button -->
+    <div style="text-align:center;">
+      <a href="/" class="btn">🔙 Back</a>
     </div>
 
   </div>
