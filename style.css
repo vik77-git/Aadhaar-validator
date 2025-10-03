@@ -1,9 +1,113 @@
-/* style.css - used by Gradio Blocks when available */
-body { font-family: Inter, sans-serif; }
-h1 { color: #1a73e8; font-weight: 600; }
-.subtitle { font-size: 14px; color: #555; margin-bottom: 20px; }
-#scanButton { background: #34a853 !important; color: white !important; padding: 10px 22px; border-radius: 8px; font-weight: 600; }
-#scanButton:hover { opacity: 0.95; }
-.gradio-container { background: #f8f9fb; padding: 18px; border-radius: 12px; }
-footer { border-top: 3px solid #0c5adb; border-radius: 6px; }
-#resultsDiv { background: #fafafa; padding: 14px; border-radius: 8px; border: 1px solid #e0e0e0; }
+/* Base Styling */
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f8f9fb;
+  margin: 0;
+  padding: 0;
+  color: #2c3e50;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Card Container (we render header with gr.HTML so main card styling is applied to results) */
+h1 {
+  color: #1a73e8;
+  margin-bottom: 6px;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+/* Subtitle appears under header */
+.subtitle {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 18px;
+}
+
+/* Re-create your "card" look by styling the main results area and gradio body */
+.gradio-container {
+  background: transparent !important;
+  padding: 18px;
+}
+
+/* Results Card Styling (matches your provided style) */
+.results {
+  max-width: 700px;
+  margin: 20px auto 12px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+  text-align: left;
+}
+
+.results h3 {
+  margin: 0 0 12px 0;
+  color: #1a73e8;
+}
+
+.result-item {
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #2c3e50;
+}
+
+.result-item code {
+  background: #f1f3f4;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #222;
+}
+
+.status {
+  margin-left: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Photo styling */
+.gradio-image, .gradio-img {
+  border-radius: 10px;
+  border: 2px solid #ddd;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+}
+
+/* Buttons (override Gradio defaults for consistent look) */
+#scanButton .gr-button, .gr-button, button#scanButton {
+  background: #34a853 !important;
+  color: #fff !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  box-shadow: 0 6px 18px rgba(52,168,83,0.18);
+}
+
+/* File input label fallback (some Gradio elements differ by version) */
+.gr-file [type="file"] {
+  display: block !important;
+}
+
+/* Ensure markdown/output text is visible */
+.gradio-markdown, .gr-markdown, .output_markdown, .gradio-output {
+  color: #2c3e50 !important;
+}
+
+/* Footer style: keep same look */
+footer {
+  text-align: center;
+  padding: 12px;
+  background: #1a73e8;
+  color: #fff;
+  font-size: 14px;
+  border-top: 3px solid #0c5adb;
+  margin-top: 18px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 800px) {
+  .results { margin: 12px; padding: 16px; }
+}
