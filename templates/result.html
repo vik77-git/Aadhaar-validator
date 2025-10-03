@@ -10,33 +10,29 @@
   <div class="container">
     <h1>📊 Aadhaar Scan Results</h1>
 
-    <div class="results">
-      <h3>Extracted Data</h3>
-      <div class="result-item"><strong>Aadhaar Number:</strong> {{ extracted.aadhaar_number or '—' }} <span class="status">{{ validations.aadhaar_number }}</span></div>
-      <div class="result-item"><strong>Name:</strong> {{ extracted.name or '—' }} <span class="status">{{ validations.name }}</span></div>
-      <div class="result-item"><strong>DOB:</strong> {{ extracted.dob or '—' }} <span class="status">{{ validations.dob }}</span></div>
+    <!-- Uploaded Aadhaar Image -->
+    <div style="text-align:center; margin:20px 0;">
+      <h3>Uploaded Aadhaar</h3>
+      <img src="{{ input_image }}" alt="Input Aadhaar Image" class="uploaded-image">
+    </div>
 
-      <div class="photo-section" style="display:flex; gap:18px; justify-content:center; margin-top:18px;">
-        <div>
-          <h4>Uploaded Aadhaar</h4>
-          <img src="{{ input_image }}" alt="Input Image">
-        </div>
-        <div>
-          <h4>Annotated Detection</h4>
-          <img src="{{ annotated_image }}" alt="Annotated Image">
-        </div>
-      </div>
+    <!-- Extracted Data Card -->
+    <div class="results-card">
+      <h3>Extracted Aadhaar Data</h3>
+      <p><strong>Aadhaar Number:</strong> {{ extracted.aadhaar_number or '—' }} — <span class="status">{{ validations.aadhaar_number }}</span></p>
+      <p><strong>Name:</strong> {{ extracted.name or '—' }} — <span class="status">{{ validations.name }}</span></p>
+      <p><strong>DOB:</strong> {{ extracted.dob or '—' }} — <span class="status">{{ validations.dob }}</span></p>
 
       {% if photo_image %}
-      <div class="photo-section" style="margin-top:20px;">
-        <h4>Detected Photo Crop</h4>
+      <div class="photo-section">
+        <h4>Detected Photo</h4>
         <img src="{{ photo_image }}" alt="Photo Crop">
       </div>
       {% endif %}
+    </div>
 
-      <div style="margin-top:18px; text-align:center;">
-        <a href="/" class="btn">🔙 Back</a>
-      </div>
+    <div style="text-align:center; margin-top:20px;">
+      <a href="/" class="btn">🔙 Back</a>
     </div>
 
   </div>
