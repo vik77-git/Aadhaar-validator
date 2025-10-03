@@ -8,12 +8,11 @@ import cv2
 import numpy as np
 from datetime import datetime
 from PIL import Image
-from flask import Flask, request, render_template, url_for, redirect
+from flask import Flask, request, render_template, url_for, redirect, send_from_directory
 from ultralytics import YOLO
 import pytesseract
 
 # ---------- CONFIG ----------
-# Prefer explicit tesseract path if present (Spaces installs via packages.txt)
 if shutil.which("tesseract"):
     pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
 else:
@@ -21,10 +20,11 @@ else:
 
 ROOT = os.path.dirname(__file__)
 MODEL_PATH = os.path.join(ROOT, "best.pt")
-UPLOAD_FOLDER = os.path.join(ROOT, "static", "uploads")
+
+# ✅ use /tmp instead of static/uploads (writable on Spaces)
+UPLOAD_FOLDER = os.path.join("/tmp", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Make sure this matches your model's class ordering
 CLASS_MAP = {0: "aadhaar_card", 1: "aadhaar_number", 2: "dob", 3: "name", 4: "photo"}
 
 # ---------- Verhoeff (Aadhaar) ----------
@@ -64,13 +64,8 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
 
 def tesseract_ocr(img):
-    """
-    img: BGR numpy array
-    returns recognized text (string) or raises RuntimeError if tesseract missing
-    """
-    # ensure tesseract binary available
     if not shutil.which(pytesseract.pytesseract.tesseract_cmd) and not shutil.which("tesseract"):
-        raise RuntimeError("Tesseract binary not found on the system. Install tesseract-ocr (packages.txt for Spaces).")
+        raise RuntimeError("Tesseract binary not found.")
     try:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     except Exception:
@@ -107,7 +102,7 @@ def validate_aadhaar(num):
     if len(digits) != 12: return "❌ Invalid length"
     return "✅ Valid" if verhoeff_check(digits) else "❌ Invalid (Verhoeff failed)"
 
-# ---------- Load YOLO model ----------
+# ---------- Load YOLO ----------
 print("Loading YOLO model from:", MODEL_PATH)
 model = None
 try:
@@ -117,29 +112,19 @@ except Exception as e:
     print("Warning: YOLO model not loaded:", e, file=sys.stderr)
     model = None
 
-# ---------- Helpers to open images ----------
+# ---------- Helpers ----------
 def pil_to_cv2(image: Image.Image):
     image = image.convert("RGB")
     arr = np.array(image)
-    bgr = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
-    return bgr
+    return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
 
 def open_input_image(input_obj):
-    """
-    Accepts:
-      - filepath (str)
-      - file-like (has .read())
-      - bytes
-    Returns PIL.Image
-    """
     if input_obj is None:
         raise ValueError("No input provided")
     if isinstance(input_obj, str):
         return Image.open(input_obj)
     if hasattr(input_obj, "read"):
         data = input_obj.read()
-        if isinstance(data, bytes):
-            return Image.open(io.BytesIO(data))
         return Image.open(io.BytesIO(data))
     if isinstance(input_obj, (bytes, bytearray)):
         return Image.open(io.BytesIO(input_obj))
@@ -147,7 +132,6 @@ def open_input_image(input_obj):
 
 # ---------- Core processing ----------
 def process_image_file(file_stream_or_path):
-    """Returns dict: extracted, validations, annotated_path, photo_path (if any)"""
     try:
         pil_image = open_input_image(file_stream_or_path)
     except Exception as e:
@@ -159,24 +143,19 @@ def process_image_file(file_stream_or_path):
     extracted = {"aadhaar_number": "", "dob": "", "name": "", "photo": ""}
 
     if model is None:
-        return {"error": "YOLO model not loaded. Ensure best.pt is present in repo root."}
+        return {"error": "YOLO model not loaded."}
 
     try:
         results = model(img)
     except Exception as e:
         return {"error": f"Model inference error: {e}"}
 
-    # parse detections
     for r in results:
         boxes = getattr(r, "boxes", None)
         if boxes is None:
             continue
-        try:
-            xyxy = boxes.xyxy.cpu().numpy()
-            cls_ids = boxes.cls.cpu().numpy().astype(int)
-        except Exception:
-            xyxy = np.array(boxes.xyxy)
-            cls_ids = np.array(boxes.cls).astype(int)
+        xyxy = boxes.xyxy.cpu().numpy()
+        cls_ids = boxes.cls.cpu().numpy().astype(int)
 
         for (x1, y1, x2, y2), cls_id in zip(xyxy, cls_ids):
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
@@ -188,18 +167,12 @@ def process_image_file(file_stream_or_path):
             label = CLASS_MAP.get(int(cls_id), f"class_{cls_id}")
 
             if label == "aadhaar_number":
-                try:
-                    text = tesseract_ocr(crop)
-                except Exception as e:
-                    return {"error": f"Tesseract OCR error: {e}"}
+                text = tesseract_ocr(crop)
                 digits = re.sub(r"[^0-9]", "", text)
                 if len(digits) == 12:
                     extracted["aadhaar_number"] = digits
             elif label in ("dob", "name"):
-                try:
-                    text = tesseract_ocr(crop)
-                except Exception as e:
-                    return {"error": f"Tesseract OCR error: {e}"}
+                text = tesseract_ocr(crop)
                 text = re.sub(r"[^A-Za-z0-9\-/ ]", " ", text).strip()
                 if len(text) > len(extracted.get(label, "")):
                     extracted[label] = text
@@ -207,13 +180,9 @@ def process_image_file(file_stream_or_path):
                 rel_photo = f"photo_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
                 out_photo = os.path.join(UPLOAD_FOLDER, rel_photo)
                 cv2.imwrite(out_photo, crop)
-                extracted["photo"] = out_photo
+                extracted["photo"] = rel_photo
 
-    # fallback full OCR
-    try:
-        full_text = tesseract_ocr(img)
-    except Exception as e:
-        return {"error": f"Tesseract OCR error: {e}"}
+    full_text = tesseract_ocr(img)
 
     if not extracted["aadhaar_number"]:
         m = re.search(r"\b\d{4}\s?\d{4}\s?\d{4}\b", full_text)
@@ -240,44 +209,25 @@ def process_image_file(file_stream_or_path):
         "dob": validate_dob(extracted.get("dob")),
     }
 
-    # annotated image
-    annotated = img.copy()
-    try:
-        for r in results:
-            boxes = getattr(r, "boxes", None)
-            if boxes is None:
-                continue
-            xyxy = boxes.xyxy.cpu().numpy()
-            cls_ids = boxes.cls.cpu().numpy().astype(int)
-            for (x1, y1, x2, y2), cls_id in zip(xyxy, cls_ids):
-                x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-                color = (50, 150, 255)
-                cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 2)
-                cv2.putText(annotated, CLASS_MAP.get(int(cls_id), str(cls_id)), (x1, max(0, y1-6)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-    except Exception:
-        pass
-
-    annotated_rgb = cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB)
-    annotated_pil = Image.fromarray(annotated_rgb)
-
-    # save annotated image
     ann_name = f"annotated_{uuid.uuid4().hex}.jpg"
     ann_path = os.path.join(UPLOAD_FOLDER, ann_name)
-    annotated_bgr = cv2.cvtColor(np.array(annotated_pil), cv2.COLOR_RGB2BGR)
-    cv2.imwrite(ann_path, annotated_bgr)
+    annotated = img.copy()
+    for r in results:
+        for (x1, y1, x2, y2), cls_id in zip(r.boxes.xyxy.cpu().numpy(), r.boxes.cls.cpu().numpy().astype(int)):
+            x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
+            cv2.rectangle(annotated, (x1, y1), (x2, y2), (50, 150, 255), 2)
+            cv2.putText(annotated, CLASS_MAP.get(cls_id, str(cls_id)), (x1, max(0, y1-6)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (50, 150, 255), 2)
+    cv2.imwrite(ann_path, annotated)
 
-    response = {
+    return {
         "extracted": extracted,
         "validations": validations,
-        "annotated_path": ann_path,
-        "photo_path": extracted.get("photo")
+        "annotated": os.path.basename(ann_path),
+        "photo": extracted.get("photo")
     }
 
-    return response
-
-# ---------- Flask app ----------
-from flask import Flask, render_template
+# ---------- Flask ----------
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -295,30 +245,27 @@ def scan_route():
     if not allowed_file(file.filename):
         return render_template("index.html", error="Invalid file type")
 
-    # save uploaded file
     fname = f"upload_{uuid.uuid4().hex}.jpg"
     save_path = os.path.join(UPLOAD_FOLDER, fname)
     file.save(save_path)
 
-    # process
     result = process_image_file(save_path)
-    if isinstance(result, dict) and result.get("error"):
-        return render_template("index.html", error=result.get("error"))
-
-    extracted = result["extracted"]
-    validations = result["validations"]
-    annotated_rel = os.path.relpath(result["annotated_path"], ROOT)
-    photo_rel = os.path.relpath(result.get("photo_path") or "", ROOT)
+    if result.get("error"):
+        return render_template("index.html", error=result["error"])
 
     return render_template(
         "result.html",
-        input_image=url_for('static', filename=f"uploads/{fname}"),
-        annotated_image=url_for('static', filename=f"{os.path.basename(annotated_rel)}"),
-        photo_image=(url_for('static', filename=f"{os.path.basename(photo_rel)}") if photo_rel else None),
-        extracted=extracted,
-        validations=validations
+        input_image=url_for("serve_upload", filename=fname),
+        annotated_image=url_for("serve_upload", filename=result["annotated"]),
+        photo_image=(url_for("serve_upload", filename=result["photo"]) if result.get("photo") else None),
+        extracted=result["extracted"],
+        validations=result["validations"]
     )
 
+# ✅ Serve /tmp/uploads files
+@app.route("/uploads/<path:filename>")
+def serve_upload(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
+
 if __name__ == "__main__":
-    # Port 7860 for Hugging Face Spaces
     app.run(host="0.0.0.0", port=7860)
