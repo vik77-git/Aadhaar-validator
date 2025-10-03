@@ -29,8 +29,8 @@
 
     <form id="uploadForm" action="/scan" method="post" enctype="multipart/form-data">
       <label class="custom-file-upload">
-        <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" required>
-        📂 Choose Aadhaar File
+        <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" required style="display:none;">
+        Choose Aadhaar File
       </label>
       <p id="fileName" class="filename">No file chosen</p>
       <button type="submit" id="scanButton">Scan Aadhaar</button>
