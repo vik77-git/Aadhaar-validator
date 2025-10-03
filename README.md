@@ -1,9 +1,9 @@
 ---
 title: Aadhaar Validator
-emoji: 🪪
+emoji: 💻
 colorFrom: blue
-colorTo: green
-sdk: docker
+colorTo: indigo
+sdk: static
 app_file: app.py
 pinned: true
 license: apache-2.0
