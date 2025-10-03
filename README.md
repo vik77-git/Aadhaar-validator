@@ -1,27 +1,26 @@
----
-license: apache-2.0
-title: demo
-sdk: gradio
-emoji: 💻
-colorTo: indigo
-pinned: true
-short_description: Aadhaar_validator
----
-# Aadhaar Validator - Hugging Face Space (Gradio)
+# Aadhaar Validator (Flask + YOLO + Tesseract)
 
-Place `best.pt` (YOLO model file) in the repository root. This Space runs a Gradio app which:
+Aadhaar Card Verification System using Flask, YOLOv8, and Tesseract OCR.
 
-- Loads your YOLO model (`best.pt`) using `ultralytics`.
-- Accepts Aadhaar card image uploads and runs detection for: aadhaar_card, aadhaar_number, dob, name, photo.
-- Runs Tesseract OCR on detected crops and full image fallback.
-- Validates Aadhaar using Verhoeff algorithm.
-- Displays annotated image and extracted fields.
+## Included files
+- `app.py` — Flask server (YOLO inference, OCR, Verhoeff validation)
+- `requirements.txt` — Python dependencies
+- `packages.txt` — system packages (Tesseract) for Hugging Face Spaces
+- `templates/index.html` — upload UI
+- `templates/result.html` — results UI
+- `static/style.css` — professional styling
+- `static/uploads/` — created at runtime for images
+- `best.pt` — **place your YOLO model here (required)**
 
-Files:
-- `app.py` - Gradio application and processing logic
-- `style.css` - small UI styles
-- `requirements.txt` - Python packages
-- `apt.txt` - system packages (Tesseract)
-- `best.pt` - put your trained YOLO weights here
+## Deploy on Hugging Face Spaces
+1. Create a new Space (choose **"Other"** / default settings).
+2. Upload all files above and **put `best.pt` in the repo root**.
+3. The Space will install Python packages from `requirements.txt` and apt packages from `packages.txt`.
+4. The Flask app listens on port **7860**; Spaces will expose it automatically.
 
-Upload all files to the Space and start. If model fails to load, check `best.pt` path and that it's a YOLOv8-compatible weights file.
+## Run locally
+```bash
+pip install -r requirements.txt
+# On Ubuntu:
+sudo apt-get update && sudo apt-get install -y tesseract-ocr libtesseract-dev
+python app.py
