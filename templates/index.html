@@ -5,16 +5,27 @@
   <title>Aadhaar Validator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <div class="container">
     <h1>Aadhaar Card Verification System</h1>
     <p class="subtitle">Upload an Aadhaar card image for validation</p>
 
+    <!-- Remove inline error box, we'll use SweetAlert instead -->
     {% if error %}
-      <div class="results" style="border-left:4px solid #d32f2f; background:#fff6f6; padding:12px; margin-bottom:12px;">
-        <strong>Error:</strong> {{ error }}
-      </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: '{{ error }}',
+          confirmButtonColor: '#3085d6'
+        });
+      });
+    </script>
     {% endif %}
 
     <form id="uploadForm" action="/scan" method="post" enctype="multipart/form-data">
@@ -34,9 +45,27 @@
   <script>
     const fileInput = document.getElementById('fileInput');
     const fileName = document.getElementById('fileName');
+    const form = document.getElementById('uploadForm');
+
     fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) fileName.textContent = `Uploaded File: ${e.target.files[0].name}`;
-      else fileName.textContent = 'No file chosen';
+      if (e.target.files.length > 0) {
+        fileName.textContent = `Uploaded File: ${e.target.files[0].name}`;
+      } else {
+        fileName.textContent = 'No file chosen';
+      }
+    });
+
+    // Prevent form submit if no file selected
+    form.addEventListener('submit', function (e) {
+      if (!fileInput.value) {
+        e.preventDefault();
+        Swal.fire({
+          icon: 'warning',
+          title: 'No file selected',
+          text: 'Please choose an Aadhaar card image before scanning.',
+          confirmButtonColor: '#3085d6'
+        });
+      }
     });
   </script>
 </body>
