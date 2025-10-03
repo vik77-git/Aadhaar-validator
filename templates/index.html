@@ -5,15 +5,19 @@
   <title>Aadhaar Validator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <div class="container">
     <h1>Aadhaar Card Verification System</h1>
     <p class="subtitle">Upload an Aadhaar card image for validation</p>
 
-    <!-- File Upload -->
-    <form id="uploadForm" enctype="multipart/form-data">
+    {% if error %}
+      <div class="results" style="border-left:4px solid #d32f2f; background:#fff6f6; padding:12px; margin-bottom:12px;">
+        <strong>Error:</strong> {{ error }}
+      </div>
+    {% endif %}
+
+    <form id="uploadForm" action="/scan" method="post" enctype="multipart/form-data">
       <label class="custom-file-upload">
         <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" required>
         📂 Choose Aadhaar File
@@ -21,16 +25,19 @@
       <p id="fileName" class="filename">No file chosen</p>
       <button type="submit" id="scanButton">🔍 Scan Aadhaar</button>
     </form>
-
-    <div id="results" class="results"></div>
   </div>
 
-  <!-- Footer -->
   <footer>
     <p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
   </footer>
 
-  <!-- External JS -->
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const fileName = document.getElementById('fileName');
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) fileName.textContent = `Uploaded File: ${e.target.files[0].name}`;
+      else fileName.textContent = 'No file chosen';
+    });
+  </script>
 </body>
 </html>
