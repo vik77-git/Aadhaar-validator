@@ -5,33 +5,113 @@
   <title>Scan Result - Aadhaar Validator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a73e8;
+      margin-bottom: 24px;
+    }
+
+    .results-card {
+      background: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+
+    .results-card h3 {
+      text-align: center;
+      margin-bottom: 18px;
+      color: #155ab6;
+    }
+
+    .results-card p {
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .results-card p:last-child {
+      border-bottom: none;
+    }
+
+    .status {
+      font-weight: 600;
+    }
+
+    .photo-section {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .photo-section img {
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #1a73e8;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #155ab6;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>📊 Aadhaar Scan Results</h1>
+
+    <!-- Uploaded Aadhaar Image -->
+    <div class="photo-section">
+      <h4>Uploaded Aadhaar</h4>
+      <img src="{{ input_image }}" alt="Uploaded Aadhaar">
+    </div>
+
     <!-- Extracted Data Card -->
     <div class="results-card">
       <h3>Extracted Aadhaar Data</h3>
-      <p><strong>Aadhaar Number:</strong> {{ extracted.aadhaar_number or '—' }} — <span class="status">{{ validations.aadhaar_number }}</span></p>
-      <p><strong>Name:</strong> {{ extracted.name or '—' }} — <span class="status">{{ validations.name }}</span></p>
-      <p><strong>DOB:</strong> {{ extracted.dob or '—' }} — <span class="status">{{ validations.dob }}</span></p>
+      <p><span>Aadhaar Number:</span> <span>{{ extracted.aadhaar_number or '— —' }} — <span class="status">{{ validations.aadhaar_number }}</span></span></p>
+      <p><span>Name:</span> <span>{{ extracted.name or '— —' }} — <span class="status">{{ validations.name }}</span></span></p>
+      <p><span>DOB:</span> <span>{{ extracted.dob or '— —' }} — <span class="status">{{ validations.dob }}</span></span></p>
 
       {% if photo_image %}
-      <div class="photo-section">
-        <h4>Detected Photo</h4>
-        <img src="{{ photo_image }}" alt="Photo Crop">
+      <div class="photo-section" style="margin-top:20px;">
+        <h4>Detected Photo Crop</h4>
+        <img src="{{ photo_image }}" alt="Detected Photo">
       </div>
       {% endif %}
     </div>
 
-    <div style="text-align:center; margin-top:20px;">
+    <div style="text-align:center;">
       <a href="/" class="btn">Back</a>
     </div>
 
   </div>
 
   <footer>
-    <p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
+    <p style="text-align:center; margin-top:20px;">© 2025 Aadhaar Verification System | Secure Identity Validation</p>
   </footer>
 </body>
 </html>
