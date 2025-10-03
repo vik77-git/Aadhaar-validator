@@ -1,3 +1,12 @@
+---
+license: apache-2.0
+title: demo
+sdk: gradio
+emoji: 💻
+colorTo: indigo
+pinned: true
+short_description: Aadhaar_validator
+---
 # Aadhaar Validator - Hugging Face Space (Gradio)
 
 Place `best.pt` (YOLO model file) in the repository root. This Space runs a Gradio app which:
