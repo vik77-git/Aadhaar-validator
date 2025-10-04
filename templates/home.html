@@ -13,6 +13,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      top: 0 !important;
     }
     nav {
       background-color: #14A800;
@@ -23,7 +24,7 @@
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
       position: relative;
-      z-index: 1001; /* navbar on top */
+      z-index: 1001;
     }
     nav .logo { font-size: 1.3rem; font-weight: 600; }
     nav ul { list-style: none; display: flex; margin: 0; padding: 0; }
@@ -56,7 +57,7 @@
       border-top: 3px solid #0D7300;
     }
 
-    /* Google Translate button */
+    /* Google Translate Button */
     #translateBtn {
       position: fixed;
       top: 80px;
@@ -79,13 +80,12 @@
     #translateBtn:hover { background-color: #0D7300; }
     #translateBtn span { font-size: 24px; }
 
-    /* Custom Google Translate dropdown */
     #google_translate_element {
       display: none;
       position: fixed;
       top: 140px;
       left: 20px;
-      z-index: 1000; /* behind navbar */
+      z-index: 1000;
       background: #14A800;
       color: white;
       border-radius: 12px;
@@ -106,9 +106,7 @@
     }
     #google_translate_element select:hover { background: #f1f1f1; }
 
-    /* Hide default Google Translate elements */
     .goog-te-gadget-icon, .goog-te-menu-value span { display: none !important; }
-    body { top: 0 !important; }
   </style>
 </head>
 <body>
@@ -122,7 +120,6 @@
     </ul>
   </nav>
 
-  <!-- Google Translate button -->
   <button id="translateBtn" title="Choose Language"><span>🌐</span></button>
   <div id="google_translate_element"></div>
 
@@ -155,9 +152,10 @@
       translateElement.style.display = translateElement.style.display === 'block' ? 'none' : 'block';
     });
 
+    // Hide Google Translate top banner completely
     setInterval(() => {
-      const iframe = document.querySelector('iframe.goog-te-banner-frame');
-      if (iframe) iframe.style.zIndex = '0'; // behind navbar
+      const banner = document.querySelector('iframe.goog-te-banner-frame');
+      if (banner) banner.style.display = 'none';
     }, 500);
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
