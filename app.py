@@ -13,13 +13,20 @@ else:
 
 ROOT = os.path.dirname(__file__)
 MODEL_PATH = os.path.join(ROOT, "best.pt")
-UPLOAD_FOLDER = os.path.join(ROOT, "static", "uploads")
+
+# ✅ Use /tmp instead of static/uploads for Hugging Face write permissions
+UPLOAD_FOLDER = os.path.join("/tmp", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 CLASS_MAP = {0:"aadhaar_card",1:"aadhaar_number",2:"dob",3:"name",4:"photo"}
 
 # ---------- Verhoeff ----------
-verhoeff_table_d=[[0,1,2,3,4,5,6,7,8,9],[1,2,3,4,0,6,7,8,9,5],[2,3,4,0,1,7,8,9,5,6],[3,4,0,1,2,8,9,5,6,7],[4,0,1,2,3,9,5,6,7,8],[5,9,8,7,6,0,4,3,2,1],[6,5,9,8,7,1,0,4,3,2],[7,6,5,9,8,2,1,0,4,3],[8,7,6,5,9,3,2,1,0,4],[9,8,7,6,5,4,3,2,1,0]]
-verhoeff_table_p=[[0,1,2,3,4,5,6,7,8,9],[1,5,7,6,2,8,3,0,9,4],[5,8,0,3,7,9,6,1,4,2],[8,9,1,6,0,4,3,5,2,7],[9,4,5,3,1,2,6,8,7,0],[4,2,8,6,5,7,3,9,0,1],[2,7,9,3,8,0,6,4,1,5],[7,0,4,6,9,1,3,2,5,8]]
+verhoeff_table_d=[[0,1,2,3,4,5,6,7,8,9],[1,2,3,4,0,6,7,8,9,5],[2,3,4,0,1,7,8,9,5,6],
+[3,4,0,1,2,8,9,5,6,7],[4,0,1,2,3,9,5,6,7,8],[5,9,8,7,6,0,4,3,2,1],
+[6,5,9,8,7,1,0,4,3,2],[7,6,5,9,8,2,1,0,4,3],[8,7,6,5,9,3,2,1,0,4],[9,8,7,6,5,4,3,2,1,0]]
+verhoeff_table_p=[[0,1,2,3,4,5,6,7,8,9],[1,5,7,6,2,8,3,0,9,4],[5,8,0,3,7,9,6,1,4,2],
+[8,9,1,6,0,4,3,5,2,7],[9,4,5,3,1,2,6,8,7,0],[4,2,8,6,5,7,3,9,0,1],
+[2,7,9,3,8,0,6,4,1,5],[7,0,4,6,9,1,3,2,5,8]]
 def verhoeff_check(num):
     c=0
     num=num[::-1]
@@ -65,8 +72,12 @@ def validate_aadhaar(num):
 
 # ---------- Load YOLO ----------
 print("Loading YOLO model:",MODEL_PATH)
-try: model=YOLO(MODEL_PATH); print("YOLO loaded")
-except Exception as e: print("YOLO load failed:",e,file=sys.stderr); model=None
+try:
+    model=YOLO(MODEL_PATH)
+    print("YOLO loaded")
+except Exception as e:
+    print("YOLO load failed:",e,file=sys.stderr)
+    model=None
 
 # ---------- Helpers ----------
 def pil_to_cv2(image:Image.Image):
@@ -177,13 +188,13 @@ def scan_route():
 
     extracted=result["extracted"]
     validations=result["validations"]
-    photo_rel=os.path.relpath(result.get("photo_path") or "",ROOT)
 
-    return render_template("result.html",
-        input_image=url_for('static',filename=f"uploads/{fname}"),
+    return render_template(
+        "result.html",
+        input_image=f"/tmp/uploads/{fname}",
         extracted=extracted,
         validations=validations,
-        photo_image=(url_for('static',filename=os.path.basename(photo_rel)) if photo_rel else None)
+        photo_image=(result.get("photo_path") if result.get("photo_path") else None)
     )
 
 if __name__=="__main__":
