@@ -5,6 +5,8 @@
   <title>Home | Aadhaar Validator</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -13,8 +15,10 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      top: 0 !important;
+      color: #444;
     }
+
+    /* Navbar */
     nav {
       background-color: #14A800;
       color: white;
@@ -24,7 +28,7 @@
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
       position: relative;
-      z-index: 1001;
+      z-index: 10;
     }
     nav .logo { font-size: 1.3rem; font-weight: 600; }
     nav ul { list-style: none; display: flex; margin: 0; padding: 0; }
@@ -32,22 +36,7 @@
     nav ul li a { color: white; text-decoration: none; font-weight: 500; transition: color 0.3s; }
     nav ul li a:hover, nav ul li a.active { text-decoration: underline; color: #D7FFD9; }
 
-    .content { flex: 1; text-align: center; margin: 100px 20px; }
-    h1 { color: #14A800; font-size: 2rem; margin-bottom: 10px; }
-    p { color: #444; font-size: 1.05rem; max-width: 600px; margin: auto; line-height: 1.6; }
-    .btn-next {
-      display: inline-block;
-      margin-top: 25px;
-      background-color: #14A800;
-      color: white;
-      padding: 12px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: background-color 0.3s;
-    }
-    .btn-next:hover { background-color: #0D7300; }
-
+    /* Footer */
     footer {
       text-align: center;
       font-size: 0.85rem;
@@ -55,9 +44,79 @@
       padding: 15px;
       background: #14A800;
       border-top: 3px solid #0D7300;
+      margin-top: 40px;
     }
 
-    /* Custom Google Translate Button */
+    /* Page content */
+    .content {
+      flex: 1;
+      text-align: center;
+      margin: 100px 20px;
+      padding: 30px;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      background-color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h1 { 
+      color: #0073e6; 
+      font-size: 2rem; 
+      margin-bottom: 10px; 
+    }
+    p { font-size: 1.05rem; margin-bottom: 20px; line-height: 1.6; }
+
+    /* Next button with left-to-right fill and refill using keyframes */
+    .btn-next {
+      position: relative;
+      display: inline-block;
+      margin-top: 25px;
+      padding: 12px 28px;
+      font-weight: 600;
+      text-decoration: none;
+      color: white;
+      border-radius: 8px;
+      background-color: #007bff;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    /* Overlay for animation */
+    .btn-next::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%; /* start fully left outside */
+      width: 100%;
+      height: 100%;
+      background-color: #FF0000;
+      z-index: -1;
+      transition: none;
+    }
+
+    /* Hover: slide red overlay left → right */
+    .btn-next:hover::before {
+      animation: slideIn 0.5s forwards;
+    }
+
+    /* Mouse leave: slide red overlay further right off button to reveal blue */
+    .btn-next:not(:hover)::before {
+      animation: slideOut 0.5s forwards;
+    }
+
+    @keyframes slideIn {
+      0% { left: -100%; }
+      100% { left: 0%; }
+    }
+
+    @keyframes slideOut {
+      0% { left: 0%; }
+      100% { left: 100%; }
+    }
+
+    /* Floating Translate Button */
     #translateBtn {
       position: fixed;
       top: 80px;
@@ -69,51 +128,32 @@
       color: white;
       border: none;
       cursor: pointer;
-      font-size: 1.3rem;
-      z-index: 1000;
+      font-size: 1.5rem;
       display: flex;
       justify-content: center;
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: background 0.3s;
+      z-index: 1000;
     }
     #translateBtn:hover { background-color: #0D7300; }
-    #translateBtn span { font-size: 24px; }
 
-    #languageMenu {
+    /* Google Translate container */
+    #translateContainer {
       display: none;
       position: fixed;
       top: 140px;
       left: 20px;
       z-index: 1000;
-      background: #14A800;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      padding: 10px;
-      min-width: 180px;
-      font-family: 'Inter', sans-serif;
-    }
-    #languageMenu select {
-      width: 100%;
-      padding: 8px 10px;
+      background: white;
       border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    #languageMenu select:hover { background: #f1f1f1; }
-
-    /* Hide default Google Translate elements */
-    .goog-te-banner-frame.skiptranslate,
-    .goog-te-gadget-icon,
-    .goog-te-menu-value span,
-    .goog-te-combo {
-      display: none !important;
+      padding: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
   </style>
 </head>
 <body>
 
+  <!-- Navbar -->
   <nav>
     <div class="logo">Aadhaar Validator</div>
     <ul>
@@ -123,39 +163,25 @@
     </ul>
   </nav>
 
+  <!-- Floating Translate Button -->
   <button id="translateBtn" title="Choose Language">🌐</button>
-
-  <div id="languageMenu">
-    <select id="languageSelect">
-      <option value="en">English</option>
-      <option value="hi">Hindi</option>
-      <option value="ta">Tamil</option>
-      <option value="te">Telugu</option>
-      <option value="ml">Malayalam</option>
-      <option value="kn">Kannada</option>
-      <option value="gu">Gujarati</option>
-      <option value="bn">Bengali</option>
-      <option value="mr">Marathi</option>
-      <option value="pa">Punjabi</option>
-      <option value="ur">Urdu</option>
-    </select>
+  <div id="translateContainer">
+    <div id="google_translate_element"></div>
   </div>
 
-  <div id="google_translate_element"></div>
-
+  <!-- Main Content -->
   <div class="content">
     <h1>Welcome to Aadhaar Validator</h1>
-    <p>
-      Verify Aadhaar card authenticity using advanced OCR-based scanning.
-      Fast, secure, and built for accuracy.
-    </p>
+    <p>Verify Aadhaar card authenticity using advanced OCR-based scanning. Fast, secure, and built for accuracy.</p>
     <a href="{{ url_for('about') }}" class="btn-next">Next →</a>
   </div>
 
+  <!-- Footer -->
   <footer>
     © 2025 Aadhaar Validator | Secure Identity Validation
   </footer>
 
+  <!-- Google Translate Scripts -->
   <script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
@@ -166,36 +192,11 @@
     }
 
     const translateBtn = document.getElementById('translateBtn');
-    const languageMenu = document.getElementById('languageMenu');
-    const languageSelect = document.getElementById('languageSelect');
-
+    const translateContainer = document.getElementById('translateContainer');
     translateBtn.addEventListener('click', () => {
-      languageMenu.style.display = languageMenu.style.display === 'block' ? 'none' : 'block';
+      translateContainer.style.display = translateContainer.style.display === 'block' ? 'none' : 'block';
     });
-
-    languageSelect.addEventListener('change', () => {
-      const lang = languageSelect.value;
-
-      // Trigger translation after Google combo is available
-      const interval = setInterval(() => {
-        const combo = document.querySelector(".goog-te-combo");
-        if (combo) {
-          combo.value = lang;
-          combo.dispatchEvent(new Event("change"));
-          clearInterval(interval);
-        }
-      }, 200);
-
-      languageMenu.style.display = 'none';
-    });
-
-    // Repeatedly hide Google banner
-    setInterval(() => {
-      const banner = document.querySelector('iframe.goog-te-banner-frame');
-      if (banner) banner.style.display = 'none';
-    }, 500);
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
 </body>
 </html>
