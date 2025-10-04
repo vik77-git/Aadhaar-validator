@@ -8,6 +8,16 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f7f9fb;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #444;
+    }
+
     /* Navbar */
     nav {
       background-color: #14A800;
@@ -17,14 +27,65 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      z-index: 10;
       position: relative;
+      z-index: 10;
     }
     nav .logo { font-size: 1.3rem; font-weight: 600; }
     nav ul { list-style: none; display: flex; margin: 0; padding: 0; }
     nav ul li { margin-left: 25px; }
     nav ul li a { color: white; text-decoration: none; font-weight: 500; transition: color 0.3s; }
     nav ul li a:hover, nav ul li a.active { text-decoration: underline; color: #D7FFD9; }
+
+    /* Page content */
+    .content { flex: 1; text-align: center; margin: 100px 20px; }
+    h1 { color: #14A800; font-size: 2rem; margin-bottom: 10px; }
+    ul { max-width: 600px; margin: auto; text-align: left; line-height: 1.6; padding-left: 20px; }
+    li { margin-bottom: 10px; color: #444; font-size: 1.05rem; }
+
+    /* Next button with left-to-right fill/refill animation */
+    .btn-next {
+      position: relative;
+      display: inline-block;
+      margin-top: 25px;
+      padding: 12px 28px;
+      font-weight: 600;
+      text-decoration: none;
+      color: white;
+      border-radius: 8px;
+      background-color: #007bff;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .btn-next::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background-color: #FF0000;
+      z-index: -1;
+      transition: none;
+    }
+
+    .btn-next:hover::before {
+      animation: slideIn 0.5s forwards;
+    }
+
+    .btn-next:not(:hover)::before {
+      animation: slideOut 0.5s forwards;
+    }
+
+    @keyframes slideIn {
+      0% { left: -100%; }
+      100% { left: 0%; }
+    }
+
+    @keyframes slideOut {
+      0% { left: 0%; }
+      100% { left: 100%; }
+    }
 
     /* Footer */
     footer {
@@ -37,16 +98,7 @@
       margin-top: 40px;
     }
 
-    /* Page content */
-    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-    .content { flex: 1; text-align: center; margin: 100px 20px; }
-    h1 { color: #14A800; font-size: 2rem; margin-bottom: 10px; }
-    ul { max-width: 600px; margin: auto; text-align: left; line-height: 1.6; padding-left: 20px; }
-    li { margin-bottom: 10px; color: #444; font-size: 1.05rem; }
-    .btn-next { display: inline-block; margin-top: 25px; background-color: #14A800; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: background-color 0.3s; }
-    .btn-next:hover { background-color: #0D7300; }
-
-    /* Google Translate custom button */
+    /* Floating Translate Button */
     #translateBtn {
       position: fixed;
       top: 80px;
@@ -58,22 +110,41 @@
       color: white;
       border: none;
       cursor: pointer;
-      font-size: 1.3rem;
-      z-index: 1000;
+      font-size: 1.5rem;
       display: flex;
       justify-content: center;
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: background 0.3s;
+      z-index: 1000;
     }
     #translateBtn:hover { background-color: #0D7300; }
 
-    /* Language icon SVG inside button */
-    #translateBtn svg {
-      width: 24px;
-      height: 24px;
-      fill: white;
+    /* Google Translate container */
+    #google_translate_element {
+      display: none;
+      position: fixed;
+      top: 140px;
+      left: 20px;
+      z-index: 1000;
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
+
+    #google_translate_element select {
+      width: 100%;
+      background: white;
+      color: #444;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #google_translate_element select:hover { background: #f1f1f1; }
+
+    .goog-te-gadget-icon, .goog-te-menu-value span { display: none !important; }
   </style>
 </head>
 <body>
@@ -88,14 +159,8 @@
     </ul>
   </nav>
 
-  <!-- Google Translate Button with icon -->
-  <button id="translateBtn" title="Choose Language">
-    <svg viewBox="0 0 24 24">
-      <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c4.96 0 9-4.03 9-9s-4.04-9-9-9zm0 2c1.31 0 2.52.42 3.5 1.12l-1.5 1.5c-.54-.32-1.18-.5-1.85-.5-1.65 0-3 1.35-3 3 0 .67.18 1.31.5 1.85l-1.5 1.5c-.7-.98-1.12-2.19-1.12-3.5 0-3.31 2.69-6 6-6zm0 12c-1.31 0-2.52-.42-3.5-1.12l1.5-1.5c.54.32 1.18.5 1.85.5 1.65 0 3-1.35 3-3 0-.67-.18-1.31-.5-1.85l1.5-1.5c.7.98 1.12 2.19 1.12 3.5 0 3.31-2.69 6-6 6z"/>
-    </svg>
-  </button>
-
-  <!-- Google Translate widget -->
+  <!-- Floating Google Translate Button -->
+  <button id="translateBtn" title="Choose Language">🌐</button>
   <div id="google_translate_element"></div>
 
   <div class="content">
@@ -113,7 +178,6 @@
     © 2025 Aadhaar Validator | Secure Identity Validation
   </footer>
 
-  <!-- Google Translate Scripts -->
   <script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
@@ -123,12 +187,17 @@
       }, 'google_translate_element');
     }
 
-    // Toggle Google Translate dropdown on button click
     const translateBtn = document.getElementById('translateBtn');
     const translateElement = document.getElementById('google_translate_element');
+
     translateBtn.addEventListener('click', () => {
       translateElement.style.display = translateElement.style.display === 'block' ? 'none' : 'block';
     });
+
+    setInterval(() => {
+      const banner = document.querySelector('iframe.goog-te-banner-frame');
+      if (banner) banner.style.display = 'none';
+    }, 500);
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
