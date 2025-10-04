@@ -5,9 +5,15 @@
   <title>Instructions | Aadhaar Validator</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    /* Navbar */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f7f9fb;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
     nav {
       background-color: #14A800;
       color: white;
@@ -16,8 +22,8 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      z-index: 10;
       position: relative;
+      z-index: 1001;
     }
     nav .logo { font-size: 1.3rem; font-weight: 600; }
     nav ul { list-style: none; display: flex; margin: 0; padding: 0; }
@@ -25,7 +31,23 @@
     nav ul li a { color: white; text-decoration: none; font-weight: 500; transition: color 0.3s; }
     nav ul li a:hover, nav ul li a.active { text-decoration: underline; color: #D7FFD9; }
 
-    /* Footer */
+    .content { flex: 1; text-align: center; margin: 100px 20px; }
+    h1 { color: #14A800; font-size: 2rem; margin-bottom: 10px; }
+    ul { max-width: 600px; margin: auto; text-align: left; line-height: 1.6; padding-left: 20px; }
+    li { margin-bottom: 10px; color: #444; font-size: 1.05rem; }
+    .btn-next {
+      display: inline-block;
+      margin-top: 25px;
+      background-color: #14A800;
+      color: white;
+      padding: 12px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background-color 0.3s;
+    }
+    .btn-next:hover { background-color: #0D7300; }
+
     footer {
       text-align: center;
       font-size: 0.85rem;
@@ -33,17 +55,7 @@
       padding: 15px;
       background: #14A800;
       border-top: 3px solid #0D7300;
-      margin-top: 40px;
     }
-
-    /* Page content */
-    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-    .content { flex: 1; text-align: center; margin: 100px 20px; }
-    h1 { color: #14A800; font-size: 2rem; margin-bottom: 10px; }
-    ul { max-width: 600px; margin: auto; text-align: left; line-height: 1.6; padding-left: 20px; }
-    li { margin-bottom: 10px; color: #444; font-size: 1.05rem; }
-    .btn-next { display: inline-block; margin-top: 25px; background-color: #14A800; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: background-color 0.3s; }
-    .btn-next:hover { background-color: #0D7300; }
 
     /* Google Translate button */
     #translateBtn {
@@ -68,7 +80,6 @@
     #translateBtn:hover { background-color: #0D7300; }
     #translateBtn span { font-size: 24px; }
 
-    /* Custom Google Translate dropdown */
     #google_translate_element {
       display: none;
       position: fixed;
@@ -95,12 +106,7 @@
     }
     #google_translate_element select:hover { background: #f1f1f1; }
 
-    /* Hide default Google Translate elements */
-    .goog-te-banner-frame.skiptranslate,
-    .goog-te-gadget-icon,
-    .goog-te-menu-value span {
-      display: none !important;
-    }
+    .goog-te-gadget-icon, .goog-te-menu-value span { display: none !important; }
     body { top: 0 !important; }
   </style>
 </head>
@@ -115,7 +121,6 @@
     </ul>
   </nav>
 
-  <!-- Google Translate button -->
   <button id="translateBtn" title="Choose Language"><span>🌐</span></button>
   <div id="google_translate_element"></div>
 
@@ -151,7 +156,7 @@
 
     setInterval(() => {
       const iframe = document.querySelector('iframe.goog-te-banner-frame');
-      if (iframe) iframe.style.display = 'none';
+      if (iframe) iframe.style.zIndex = '0';
     }, 500);
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
