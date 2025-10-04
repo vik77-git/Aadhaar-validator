@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Embed Aadhaar Validator</title>
+<style>
+body,html{margin:0;padding:0;height:100%}
+iframe{width:100%;border:none;border-radius:12px;height:1000px;}
+</style>
+</head>
+<body>
+<iframe src="https://huggingface.co/spaces/username/aadhaar_validator?__theme=light" id="aadhaarFrame"></iframe>
+<script>
+window.addEventListener('message',function(event){
+  if(event.origin.includes("huggingface.co")){
+    const data=event.data;
+    if(data.type==="height"&&data.height){
+      document.getElementById("aadhaarFrame").style.height=data.height+"px";
+    }
+  }
+});
+</script>
+</body>
+</html>
