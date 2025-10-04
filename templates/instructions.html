@@ -2,27 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Instructions - Aadhaar Validator</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Instructions | Aadhaar Validator</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f7f9fb;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    nav {
+      background-color: #007bff;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+    nav .logo {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li { margin-left: 25px; }
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    nav ul li a:hover, nav ul li a.active {
+      color: #dbe9ff;
+      text-decoration: underline;
+    }
+    .content {
+      flex: 1;
+      max-width: 700px;
+      margin: 80px auto;
+      text-align: left;
+      padding: 0 25px;
+    }
+    h1 {
+      color: #007bff;
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    ol {
+      color: #444;
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: white;
+      padding: 15px;
+      background: #007bff;
+      border-top: 3px solid #0056b3;
+    }
+  </style>
 </head>
 <body>
-  <nav class="navbar">
+  <nav>
+    <div class="logo">Aadhaar Validator</div>
     <ul>
       <li><a href="{{ url_for('home') }}">Home</a></li>
       <li><a href="{{ url_for('about') }}">About</a></li>
       <li><a href="{{ url_for('instructions') }}" class="active">Instructions</a></li>
-      <li><a href="{{ url_for('scan_page') }}">Scan Aadhaar</a></li>
     </ul>
   </nav>
 
-  <div class="container">
-    <h1>How to Use</h1>
+  <div class="content">
+    <h1>Instructions for Aadhaar Validation</h1>
     <ol>
-      <li>Click on “Scan Aadhaar” from the navigation bar.</li>
-      <li>Upload a clear Aadhaar card image (.jpg or .png).</li>
-      <li>Click on “Scan Aadhaar” to extract and validate data.</li>
-      <li>Results will show the Aadhaar number, name, DOB, and photo.</li>
+      <li>Click on <strong>“Start Scanning”</strong> on the Home page.</li>
+      <li>Select a clear image of your Aadhaar card (JPG, JPEG, or PNG format).</li>
+      <li>Ensure the text and photo on the card are visible and not blurred.</li>
+      <li>Click <strong>“Scan Aadhaar”</strong> to begin verification.</li>
+      <li>Wait for a few seconds while the system extracts and validates your details.</li>
+      <li>Review the extracted Aadhaar number, name, and date of birth displayed on the screen.</li>
     </ol>
   </div>
 
