@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="static/favicon.png">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <meta charset="UTF-8">
   <title>Scan Result - Aadhaar Validator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -12,15 +12,19 @@
       background-color: #f5f6fa;
       margin: 0;
       padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     .container {
       max-width: 900px;
       margin: 30px auto;
       padding: 0 20px;
+      flex: 1;
     }
     h1 {
       text-align: center;
-      color: #1a73e8;
+      color: #14A800;
       margin-bottom: 30px;
     }
     .result-section {
@@ -41,7 +45,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .validity-card {
-      border: 2px solid #1a73e8;
+      border: 2px solid #14A800;
       border-radius: 12px;
       background-color: #fff;
       padding: 20px 25px;
@@ -51,7 +55,7 @@
     }
     .validity-card h3 {
       margin-top: 0;
-      color: #1a73e8;
+      color: #14A800;
       font-weight: 600;
       text-align: center;
       margin-bottom: 20px;
@@ -77,12 +81,12 @@
       font-weight: 600;
       color: #000;
       flex: 1;
-      word-break: break-word; /* Allows long names to wrap if needed */
+      word-break: break-word;
       margin: 0 12px;
     }
     .status {
       font-weight: 600;
-      color: #1a73e8;
+      color: #14A800;
       min-width: 90px;
       text-align: right;
       white-space: nowrap;
@@ -99,27 +103,30 @@
     .btn {
       display: inline-block;
       text-decoration: none;
-      background-color: #1a73e8;
+      background-color: #14A800;
       color: #fff;
       padding: 10px 22px;
       border-radius: 8px;
       font-weight: 600;
       transition: 0.3s;
-      margin-top: 20px; /* move button up from footer */
+      margin-top: 20px;
     }
     .btn:hover {
-      background-color: #1558b0;
+      background-color: #0D7300;
     }
+
+    /* Footer (consistent with all pages) */
     footer {
       text-align: center;
-      padding: 12px;
-      background: #1a73e8;
-      color: #fff;
-      margin-top: 40px;
-      border-radius: 0 0 12px 12px;
+      font-size: 0.85rem;
+      color: white;
+      padding: 15px;
+      background: #14A800;
+      border-top: 3px solid #0D7300;
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>Aadhaar Scan Results</h1>
@@ -163,7 +170,6 @@
     <div style="text-align:center; margin-top:20px;">
       <a href="/" class="btn">Back</a>
     </div>
-
   </div>
 
   <footer>
