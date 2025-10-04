@@ -5,53 +5,144 @@
   <title>Scan Result - Aadhaar Validator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    /* minimal inline styles kept for clarity; you can move these into style.css */
-    body { font-family: 'Inter', sans-serif; background:#f5f6fa; margin:0; padding:0; }
-    .container { max-width:900px; margin:30px auto; padding:20px; }
-    h1 { text-align:center; color:#1a73e8; margin-bottom:18px; }
-    .result-section { display:flex; gap:30px; flex-wrap:wrap; justify-content:center; align-items:flex-start; }
-    .image-card { flex:1 1 300px; max-width:350px; text-align:center; }
-    .image-card img{ max-width:100%; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
-    .validity-card { border:2px solid #1a73e8; border-radius:12px; background:#fff; padding:20px 25px; max-width:500px; box-shadow:0 4px 12px rgba(0,0,0,0.08); flex:1 1 300px; }
-    .validity-card h3 { margin-top:0; color:#1a73e8; text-align:center; margin-bottom:12px; }
-    .validity-item { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; font-size:1rem; }
-    .validity-item:last-child{ border-bottom:none; }
-    .label{ font-weight:500; color:#333; min-width:120px; white-space:nowrap; }
-    .value{ font-weight:600; color:#000; flex:1; word-break:break-word; margin:0 12px; }
-    .status{ font-weight:600; color:#1a73e8; min-width:90px; text-align:right; white-space:nowrap; }
-    .photo-section{ text-align:center; margin-top:16px; }
-    .photo-section img{ max-width:150px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-    .btn { display:inline-block; text-decoration:none; background:#1a73e8; color:#fff; padding:10px 22px; border-radius:8px; font-weight:600; margin-top:18px; }
-    footer { text-align:center; padding:12px; background:#1a73e8; color:#fff; margin-top:30px; border-radius:0 0 12px 12px; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f5f6fa;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #1a73e8;
+      margin-bottom: 30px;
+    }
+    .result-section {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .image-card {
+      flex: 1 1 300px;
+      max-width: 350px;
+      text-align: center;
+    }
+    .image-card img {
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .validity-card {
+      border: 2px solid #1a73e8;
+      border-radius: 12px;
+      background-color: #fff;
+      padding: 20px 25px;
+      max-width: 500px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      flex: 1 1 300px;
+    }
+    .validity-card h3 {
+      margin-top: 0;
+      color: #1a73e8;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .validity-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 1rem;
+    }
+    .validity-item:last-child {
+      border-bottom: none;
+    }
+    .label {
+      font-weight: 500;
+      color: #333;
+      min-width: 120px;
+      white-space: nowrap;
+    }
+    .value {
+      font-weight: 600;
+      color: #000;
+      flex: 1;
+      word-break: break-word; /* Allows long names to wrap if needed */
+      margin: 0 12px;
+    }
+    .status {
+      font-weight: 600;
+      color: #1a73e8;
+      min-width: 90px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .photo-section {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .photo-section img {
+      max-width: 150px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .btn {
+      display: inline-block;
+      text-decoration: none;
+      background-color: #1a73e8;
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: 0.3s;
+      margin-top: 20px; /* move button up from footer */
+    }
+    .btn:hover {
+      background-color: #1558b0;
+    }
+    footer {
+      text-align: center;
+      padding: 12px;
+      background: #1a73e8;
+      color: #fff;
+      margin-top: 40px;
+      border-radius: 0 0 12px 12px;
+    }
   </style>
 </head>
 <body>
-  <div class="container" id="pageRoot">
+  <div class="container">
     <h1>📊 Aadhaar Scan Results</h1>
 
     <div class="result-section">
+      <!-- Uploaded Aadhaar Image -->
       <div class="image-card">
         <h4>Uploaded Aadhaar</h4>
-        <img id="uploadedImg" src="{{ input_image }}" alt="Uploaded Aadhaar">
+        <img src="{{ input_image }}" alt="Uploaded Aadhaar">
       </div>
 
+      <!-- Extracted Validity Card -->
       <div class="validity-card">
         <h3>Extracted Aadhaar Data</h3>
-
         <div class="validity-item">
           <span class="label">Aadhaar Number:</span>
           <span class="value">{{ extracted.aadhaar_number or '—' }}</span>
           <span class="status">{{ validations.aadhaar_number }}</span>
         </div>
-
         <div class="validity-item">
           <span class="label">Name:</span>
           <span class="value">{{ extracted.name or '—' }}</span>
           <span class="status">{{ validations.name }}</span>
         </div>
-
         <div class="validity-item">
           <span class="label">DOB:</span>
           <span class="value">{{ extracted.dob or '—' }}</span>
@@ -60,46 +151,22 @@
 
         {% if photo_image %}
         <div class="photo-section">
-          <h4>Detected Photo Crop</h4>
-          <img id="photoCrop" src="{{ photo_image }}" alt="Detected Photo">
+          <h4>Aadhaar Photo</h4>
+          <img src="{{ photo_image }}" alt="Detected Photo">
         </div>
         {% endif %}
-
       </div>
     </div>
 
-    <div style="text-align:center;">
-      <a href="/" class="btn">🔙 Back</a>
+    <!-- Back Button -->
+    <div style="text-align:center; margin-top:20px;">
+      <a href="/" class="btn">Back</a>
     </div>
+
   </div>
 
-  <footer>© 2025 Aadhaar Verification System | Secure Identity Validation</footer>
-
-  <script>
-    // Post height to parent for iframe auto-resize
-    function postHeight(){
-      try {
-        const h = document.documentElement.scrollHeight || document.body.scrollHeight;
-        window.parent.postMessage({type:'height', height: h}, '*');
-      } catch(e){}
-    }
-    // send on load, and when images finish loading
-    window.addEventListener('load', function(){
-      postHeight();
-      // also wait until images load
-      const imgs = document.images;
-      let loaded = 0;
-      if (imgs.length === 0) postHeight();
-      for (let img of imgs) {
-        if (img.complete) { loaded++; continue; }
-        img.addEventListener('load', () => { postHeight(); });
-        img.addEventListener('error', () => { postHeight(); });
-      }
-      // small timeout to ensure final layout
-      setTimeout(postHeight, 600);
-    });
-    // also post on resize
-    window.addEventListener('resize', postHeight);
-  </script>
+  <footer>
+    <p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
+  </footer>
 </body>
 </html>
