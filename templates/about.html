@@ -13,8 +13,10 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      top: 0 !important;
+      color: #444;
     }
+
+    /* Navbar */
     nav {
       background-color: #14A800;
       color: white;
@@ -32,22 +34,57 @@
     nav ul li a { color: white; text-decoration: none; font-weight: 500; transition: color 0.3s; }
     nav ul li a:hover, nav ul li a.active { text-decoration: underline; color: #D7FFD9; }
 
+    /* Page content */
     .content { flex: 1; text-align: center; margin: 100px 20px; }
-    h1 { color: #14A800; font-size: 2rem; margin-bottom: 10px; }
-    p { color: #444; font-size: 1.05rem; max-width: 600px; margin: auto; line-height: 1.6; }
+    h1 { color: #007bff; font-size: 2rem; margin-bottom: 10px; }
+    p { font-size: 1.05rem; max-width: 600px; margin: auto; line-height: 1.6; }
+
+    /* Next button with left-to-right fill and refill animation */
     .btn-next {
+      position: relative;
       display: inline-block;
       margin-top: 25px;
-      background-color: #14A800;
-      color: white;
       padding: 12px 28px;
-      border-radius: 8px;
-      text-decoration: none;
       font-weight: 600;
-      transition: background-color 0.3s;
+      text-decoration: none;
+      color: white;
+      border-radius: 8px;
+      background-color: #007bff;
+      overflow: hidden;
+      z-index: 0;
     }
-    .btn-next:hover { background-color: #0D7300; }
 
+    .btn-next::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background-color: #e72828;
+      z-index: -1;
+      transition: none;
+    }
+
+    .btn-next:hover::before {
+      animation: slideIn 0.5s forwards;
+    }
+
+    .btn-next:not(:hover)::before {
+      animation: slideOut 0.5s forwards;
+    }
+
+    @keyframes slideIn {
+      0% { left: -100%; }
+      100% { left: 0%; }
+    }
+
+    @keyframes slideOut {
+      0% { left: 0%; }
+      100% { left: 100%; }
+    }
+
+    /* Footer */
     footer {
       text-align: center;
       font-size: 0.85rem;
@@ -57,7 +94,7 @@
       border-top: 3px solid #0D7300;
     }
 
-    /* Google Translate Button */
+    /* Floating Translate Button */
     #translateBtn {
       position: fixed;
       top: 80px;
@@ -69,31 +106,28 @@
       color: white;
       border: none;
       cursor: pointer;
-      font-size: 1.3rem;
-      z-index: 1000;
+      font-size: 1.5rem;
       display: flex;
       justify-content: center;
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: background 0.3s;
+      z-index: 1000;
     }
     #translateBtn:hover { background-color: #0D7300; }
-    #translateBtn span { font-size: 24px; }
 
+    /* Google Translate container */
     #google_translate_element {
       display: none;
       position: fixed;
       top: 140px;
       left: 20px;
       z-index: 1000;
-      background: #14A800;
-      color: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      background: white;
+      border-radius: 8px;
       padding: 10px;
-      min-width: 180px;
-      font-family: 'Inter', sans-serif;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
+
     #google_translate_element select {
       width: 100%;
       background: white;
@@ -120,7 +154,7 @@
     </ul>
   </nav>
 
-  <button id="translateBtn" title="Choose Language"><span>🌐</span></button>
+  <button id="translateBtn" title="Choose Language">🌐</button>
   <div id="google_translate_element"></div>
 
   <div class="content">
