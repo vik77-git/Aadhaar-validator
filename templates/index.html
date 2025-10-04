@@ -8,8 +8,64 @@
 
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    /* Navbar Styles from 1.html */
+    nav {
+      background-color: #14A800;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    nav .logo {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li { margin-left: 25px; }
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    nav ul li a:hover, nav ul li a.active {
+      text-decoration: underline;
+      color: #D7FFD9;
+    }
+
+    /* Footer Styles from 1.html */
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: white;
+      padding: 15px;
+      background: #14A800;
+      border-top: 3px solid #0D7300;
+      margin-top: 40px;
+    }
+  </style>
 </head>
 <body>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="logo">Aadhaar Validator</div>
+    <ul>
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('about') }}">About</a></li>
+      <li><a href="{{ url_for('instructions') }}">Instructions</a></li>
+    </ul>
+  </nav>
+
   <div class="container">
     <h1>Aadhaar Card Verification System</h1>
     <p class="subtitle">Upload an Aadhaar card image for validation</p>
@@ -53,8 +109,9 @@
     {% endif %}
   </div>
 
+  <!-- Footer -->
   <footer>
-    <p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
+    © 2025 Aadhaar Validator | Secure Identity Validation
   </footer>
 
   <script>
