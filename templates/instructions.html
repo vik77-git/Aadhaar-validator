@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Instructions - Aadhaar Validator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <ul>
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('about') }}">About</a></li>
+      <li><a href="{{ url_for('instructions') }}" class="active">Instructions</a></li>
+      <li><a href="{{ url_for('scan_page') }}">Scan Aadhaar</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h1>How to Use</h1>
+    <ol>
+      <li>Click on “Scan Aadhaar” from the navigation bar.</li>
+      <li>Upload a clear Aadhaar card image (.jpg or .png).</li>
+      <li>Click on “Scan Aadhaar” to extract and validate data.</li>
+      <li>Results will show the Aadhaar number, name, DOB, and photo.</li>
+    </ol>
+  </div>
+
+  <footer>
+    <p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
+  </footer>
+</body>
+</html>
