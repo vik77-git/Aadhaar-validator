@@ -159,7 +159,7 @@
     <ul>
       <li><a href="{{ url_for('home') }}">Home</a></li>
       <li><a href="{{ url_for('about') }}">About</a></li>
-      <li><a href="{{ url_for('instructions') }}">Instructions</a></li>
+      <li><a href="{{ url_for('instructions') }}" class="active">Instructions</a></li>
     </ul>
   </nav>
 
@@ -174,7 +174,7 @@
           icon: 'error',
           title: 'Error',
           text: '{{ error }}',
-          confirmButtonColor: '#3085d6'
+          confirmButtonColor: '#007bff'
         });
       });
     </script>
@@ -226,12 +226,12 @@
 
     form.addEventListener('submit', function (e) {
       if (!fileInput.value) {
-        e.preventDefault();
+        e.preventDefault(); // Stop form submission
         Swal.fire({
           icon: 'warning',
           title: 'No file selected',
           text: 'Please choose an Aadhaar card image before scanning.',
-          confirmButtonColor: '#3085d6'
+          confirmButtonColor: '#007bff'
         });
       } else {
         Swal.fire({
@@ -250,6 +250,14 @@
     translateBtn.addEventListener('click', () => {
       translateElement.style.display = translateElement.style.display === 'block' ? 'none' : 'block';
     });
+
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,hi,ta,te,ml,kn,gu,bn,mr,pa,ur',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
