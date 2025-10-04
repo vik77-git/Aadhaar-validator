@@ -6,6 +6,7 @@
   <title>Scan Result - Aadhaar Validator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -15,18 +16,35 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      color: #444;
     }
+
+    /* Navbar (green banner only) */
+    nav {
+      background-color: #14A800;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
     .container {
       max-width: 900px;
       margin: 30px auto;
       padding: 0 20px;
       flex: 1;
     }
+
     h1 {
       text-align: center;
-      color: #14A800;
+      color: #007bff;
       margin-bottom: 30px;
     }
+
     .result-section {
       display: flex;
       gap: 30px;
@@ -34,25 +52,29 @@
       justify-content: center;
       align-items: flex-start;
     }
+
     .image-card {
       flex: 1 1 300px;
       max-width: 350px;
       text-align: center;
     }
+
     .image-card img {
       max-width: 100%;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
+
     .validity-card {
       border: 2px solid #14A800;
       border-radius: 12px;
       background-color: #fff;
-      padding: 20px 25px;
+      padding: 25px 30px;
       max-width: 500px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
       flex: 1 1 300px;
     }
+
     .validity-card h3 {
       margin-top: 0;
       color: #14A800;
@@ -60,6 +82,7 @@
       text-align: center;
       margin-bottom: 20px;
     }
+
     .validity-item {
       display: flex;
       align-items: center;
@@ -68,15 +91,18 @@
       border-bottom: 1px solid #eee;
       font-size: 1rem;
     }
+
     .validity-item:last-child {
       border-bottom: none;
     }
+
     .label {
       font-weight: 500;
       color: #333;
       min-width: 120px;
       white-space: nowrap;
     }
+
     .value {
       font-weight: 600;
       color: #000;
@@ -84,6 +110,7 @@
       word-break: break-word;
       margin: 0 12px;
     }
+
     .status {
       font-weight: 600;
       color: #14A800;
@@ -91,31 +118,105 @@
       text-align: right;
       white-space: nowrap;
     }
+
     .photo-section {
       text-align: center;
       margin-top: 20px;
     }
+
     .photo-section img {
       max-width: 150px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
+
+    /* Back button with hover animation */
     .btn {
+      position: relative;
       display: inline-block;
       text-decoration: none;
-      background-color: #14A800;
-      color: #fff;
-      padding: 10px 22px;
+      background-color: #007bff;
+      color: white;
+      padding: 12px 28px;
       border-radius: 8px;
       font-weight: 600;
-      transition: 0.3s;
+      overflow: hidden;
       margin-top: 20px;
-    }
-    .btn:hover {
-      background-color: #0D7300;
+      cursor: pointer;
+      z-index: 0;
+      transition: color 0.3s;
     }
 
-    /* Footer (consistent with all pages) */
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background-color: #e72828; /* hover color */
+      z-index: -1;
+    }
+
+    .btn:hover::before {
+      animation: slideIn 0.5s forwards;
+    }
+
+    .btn:not(:hover)::before {
+      animation: slideOut 0.5s forwards;
+    }
+
+    @keyframes slideIn { 0% { left: -100%; } 100% { left: 0; } }
+    @keyframes slideOut { 0% { left: 0; } 100% { left: 100%; } }
+
+    /* Floating Translate Button */
+    #translateBtn {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #14A800;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    #translateBtn:hover { background-color: #0D7300; }
+
+    /* Google Translate container */
+    #google_translate_element {
+      display: none;
+      position: fixed;
+      top: 140px;
+      left: 20px;
+      z-index: 1000;
+      background: white;
+      border-radius: 50%;
+      padding: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    #google_translate_element select {
+      width: 100%;
+      background: white;
+      color: #444;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #google_translate_element select:hover { background: #f1f1f1; }
+
+    .goog-te-gadget-icon, .goog-te-menu-value span { display: none !important; }
+
+    /* Footer */
     footer {
       text-align: center;
       font-size: 0.85rem;
@@ -128,6 +229,14 @@
 </head>
 
 <body>
+
+  <!-- Navbar -->
+  <nav>Aadhaar Validator</nav>
+
+  <!-- Google Translate -->
+  <button id="translateBtn" title="Choose Language">🌐</button>
+  <div id="google_translate_element"></div>
+
   <div class="container">
     <h1>Aadhaar Scan Results</h1>
 
@@ -167,13 +276,38 @@
     </div>
 
     <!-- Back Button -->
-    <div style="text-align:center; margin-top:20px;">
-      <a href="/" class="btn">Back</a>
+    <div style="text-align:center;">
+      <a href="javascript:window.history.back()" class="btn">Back</a>
     </div>
   </div>
 
   <footer>
     <p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
   </footer>
+
+  <script>
+    // Google Translate
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,hi,ta,te,ml,kn,gu,bn,mr,pa,ur',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+
+    const translateBtn = document.getElementById('translateBtn');
+    const translateElement = document.getElementById('google_translate_element');
+
+    translateBtn.addEventListener('click', () => {
+      translateElement.style.display = translateElement.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Remove Google Translate banner
+    setInterval(() => {
+      const banner = document.querySelector('iframe.goog-te-banner-frame');
+      if (banner) banner.style.display = 'none';
+    }, 500);
+  </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
