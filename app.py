@@ -1,7 +1,7 @@
 import os, re, io, sys, uuid, shutil, cv2, numpy as np
 from datetime import datetime
 from PIL import Image
-from flask import Flask, request, render_template, url_for
+from flask import Flask, request, render_template, url_for, send_from_directory
 from ultralytics import YOLO
 import pytesseract
 
@@ -14,7 +14,7 @@ else:
 ROOT = os.path.dirname(__file__)
 MODEL_PATH = os.path.join(ROOT, "best.pt")
 
-# ✅ Use /tmp instead of static/uploads for Hugging Face write permissions
+# IMPORTANT: use /tmp/uploads (writable in Hugging Face Spaces)
 UPLOAD_FOLDER = os.path.join("/tmp", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -101,8 +101,12 @@ def process_image_file(file_path):
     for r in results:
         boxes=getattr(r,"boxes",None)
         if boxes is None: continue
-        xyxy=boxes.xyxy.cpu().numpy()
-        cls_ids=boxes.cls.cpu().numpy().astype(int)
+        try:
+            xyxy=boxes.xyxy.cpu().numpy()
+            cls_ids=boxes.cls.cpu().numpy().astype(int)
+        except Exception:
+            xyxy=np.array(boxes.xyxy)
+            cls_ids=np.array(boxes.cls).astype(int)
         for (x1,y1,x2,y2),cls_id in zip(xyxy,cls_ids):
             x1,y1,x2,y2=map(int,[x1,y1,x2,y2])
             x1,y1=max(0,x1),max(0,y1)
@@ -110,11 +114,12 @@ def process_image_file(file_path):
             if x2<=x1 or y2<=y1: continue
             crop=img[y1:y2,x1:x2].copy()
             label=CLASS_MAP.get(cls_id,f"class_{cls_id}")
-            text=tesseract_ocr(crop) if label!="photo" else ""
             if label=="aadhaar_number":
+                text=tesseract_ocr(crop)
                 digits=re.sub(r"[^0-9]","",text)
                 if len(digits)==12: extracted["aadhaar_number"]=digits
             elif label in ("dob","name"):
+                text=tesseract_ocr(crop)
                 text=re.sub(r"[^A-Za-z0-9\-/ ]"," ",text).strip()
                 if len(text)>len(extracted.get(label,"")): extracted[label]=text
             elif label=="photo":
@@ -123,7 +128,7 @@ def process_image_file(file_path):
                 cv2.imwrite(out_path,crop)
                 extracted["photo"]=out_path
 
-    # Fallback OCR
+    # Fallback full OCR
     full_text=tesseract_ocr(img)
     if not extracted["aadhaar_number"]:
         m=re.search(r"\b\d{4}\s?\d{4}\s?\d{4}\b",full_text)
@@ -145,13 +150,17 @@ def process_image_file(file_path):
         "dob":validate_dob(extracted.get("dob"))
     }
 
-    # Annotated image
+    # Annotated image (optional)
     annotated=img.copy()
     for r in results:
         boxes=getattr(r,"boxes",None)
         if boxes is None: continue
-        xyxy=boxes.xyxy.cpu().numpy()
-        cls_ids=boxes.cls.cpu().numpy().astype(int)
+        try:
+            xyxy=boxes.xyxy.cpu().numpy()
+            cls_ids=boxes.cls.cpu().numpy().astype(int)
+        except Exception:
+            xyxy=np.array(boxes.xyxy)
+            cls_ids=np.array(boxes.cls).astype(int)
         for (x1,y1,x2,y2),cls_id in zip(xyxy,cls_ids):
             x1,y1,x2,y2=map(int,[x1,y1,x2,y2])
             color=(50,150,255)
@@ -167,6 +176,11 @@ def process_image_file(file_path):
 # ---------- Flask ----------
 app=Flask(__name__)
 app.config["UPLOAD_FOLDER"]=UPLOAD_FOLDER
+
+# Serve uploaded files from /tmp/uploads via a URL
+@app.route("/uploads/<path:filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 @app.route("/",methods=["GET"])
 def index_route():
@@ -189,12 +203,18 @@ def scan_route():
     extracted=result["extracted"]
     validations=result["validations"]
 
+    # Build URLs for browser: use the /uploads/<filename> route
+    input_image_url = url_for('uploaded_file', filename=fname)
+    photo_image_url = None
+    if result.get("photo_path"):
+        photo_image_url = url_for('uploaded_file', filename=os.path.basename(result.get("photo_path")))
+
     return render_template(
         "result.html",
-        input_image=f"/tmp/uploads/{fname}",
+        input_image=input_image_url,
         extracted=extracted,
         validations=validations,
-        photo_image=(result.get("photo_path") if result.get("photo_path") else None)
+        photo_image=photo_image_url
     )
 
 if __name__=="__main__":
