@@ -16,11 +16,19 @@
     nav ul li a:hover, nav ul li a.active { text-decoration: underline; color: #D7FFD9; }
     .content { flex: 1; text-align: center; margin: 100px 20px; }
     h1 { color: #14A800; font-size: 2rem; margin-bottom: 10px; }
-    ul { text-align: left; max-width: 600px; margin: 30px auto; line-height: 1.8; color: #444; }
-    .upload-box { background: white; border: 2px dashed #14A800; border-radius: 10px; padding: 30px; width: 350px; margin: 30px auto; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
-    input[type="file"] { display: block; margin: 10px auto; font-size: 1rem; }
-    .btn-scan { background-color: #14A800; color: white; padding: 12px 28px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.3s; }
-    .btn-scan:hover { background-color: #0D7300; }
+    ul { text-align: left; max-width: 600px; margin: 30px auto; line-height: 1.8; color: #444; },
+    .btn-next {
+      display: inline-block;
+      margin-top: 25px;
+      background-color: #14A800;
+      color: white;
+      padding: 12px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background-color 0.3s;
+    }
+    .btn-next:hover { background-color: #0D7300; }
     footer { text-align: center; font-size: 0.85rem; color: white; padding: 15px; background: #14A800; border-top: 3px solid #0D7300; }
     #google_translate_element { position: fixed; top: 80px; left: 20px; z-index: 1000; }
   </style>
@@ -44,6 +52,7 @@
       <li>Supported formats: JPG, JPEG, PNG.</li>
       <li>Click the “Scan Aadhaar” button below to begin validation.</li>
     </ul>
+    <a href="{{ url_for('index') }}" class="btn-next">Next →</a>
 
 
   <footer>
