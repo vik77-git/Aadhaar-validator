@@ -46,7 +46,7 @@
     .btn-next { display: inline-block; margin-top: 25px; background-color: #14A800; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: background-color 0.3s; }
     .btn-next:hover { background-color: #0D7300; }
 
-    /* Google Translate custom button */
+    /* Google Translate button */
     #translateBtn {
       position: fixed;
       top: 80px;
@@ -68,33 +68,46 @@
     }
     #translateBtn:hover { background-color: #0D7300; }
 
-    /* Google Translate dropdown */
+    #translateBtn svg { width: 24px; height: 24px; fill: white; }
+
+    /* Custom Google Translate dropdown */
     #google_translate_element {
       display: none;
       position: fixed;
       top: 140px;
       left: 20px;
       z-index: 1000;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      background: #14A800;
+      color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       padding: 10px;
+      min-width: 180px;
+      font-family: 'Inter', sans-serif;
     }
 
-    /* Hide Google Translate default popups completely */
+    /* Style the select dropdown */
+    #google_translate_element select {
+      width: 100%;
+      background: white;
+      color: #444;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #google_translate_element select:hover {
+      background: #f1f1f1;
+    }
+
+    /* Hide default Google Translate elements */
     .goog-te-banner-frame.skiptranslate,
     .goog-te-gadget-icon,
     .goog-te-menu-value span {
       display: none !important;
     }
     body { top: 0 !important; }
-
-    /* Language icon SVG inside button */
-    #translateBtn svg {
-      width: 24px;
-      height: 24px;
-      fill: white;
-    }
   </style>
 </head>
 <body>
@@ -109,13 +122,13 @@
     </ul>
   </nav>
 
-  <!-- Google Translate Button with icon -->
+  <!-- Google Translate button with SVG icon -->
   <button id="translateBtn" title="Choose Language">
-    <!-- Language/translator SVG icon -->
     <svg viewBox="0 0 24 24">
       <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c4.96 0 9-4.03 9-9s-4.04-9-9-9zm0 2c1.31 0 2.52.42 3.5 1.12l-1.5 1.5c-.54-.32-1.18-.5-1.85-.5-1.65 0-3 1.35-3 3 0 .67.18 1.31.5 1.85l-1.5 1.5c-.7-.98-1.12-2.19-1.12-3.5 0-3.31 2.69-6 6-6zm0 12c-1.31 0-2.52-.42-3.5-1.12l1.5-1.5c.54.32 1.18.5 1.85.5 1.65 0 3-1.35 3-3 0-.67-.18-1.31-.5-1.85l1.5-1.5c.7.98 1.12 2.19 1.12 3.5 0 3.31-2.69 6-6 6z"/>
     </svg>
   </button>
+
   <div id="google_translate_element"></div>
 
   <div class="content">
@@ -143,14 +156,15 @@
       }, 'google_translate_element');
     }
 
-    // Toggle dropdown on button click
     const translateBtn = document.getElementById('translateBtn');
     const translateElement = document.getElementById('google_translate_element');
+
+    // Toggle dropdown
     translateBtn.addEventListener('click', () => {
       translateElement.style.display = translateElement.style.display === 'block' ? 'none' : 'block';
     });
 
-    // Remove Google Translate iframes to prevent nav hide
+    // Continuously remove Google Translate iframe popups
     setInterval(() => {
       const iframe = document.querySelector('iframe.goog-te-banner-frame');
       if (iframe) iframe.style.display = 'none';
