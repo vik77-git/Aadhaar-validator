@@ -3,61 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <title>Aadhaar Validator</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
+  
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f5f8fb;
+      background-color: #f7f9fb;
       margin: 0;
       padding: 0;
-      color: #1a1a1a;
+      color: #222;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
 
+    /* Navbar Styling */
+    nav {
+      background-color: #007bff;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    nav .logo {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav ul li {
+      margin-left: 25px;
+    }
+
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    nav ul li a:hover {
+      color: #dbe9ff;
+    }
+
+    /* Main Container */
     .container {
       flex: 1;
-      max-width: 520px;
-      margin: 70px auto 30px;
-      background: #ffffff;
-      padding: 45px 35px;
-      border-radius: 18px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      max-width: 500px;
+      margin: 70px auto 40px;
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
       text-align: center;
     }
 
     h1 {
       font-size: 1.9rem;
       margin-bottom: 10px;
-      color: #007bff;
-      letter-spacing: 0.3px;
+      color: #28a745;
     }
 
     .subtitle {
       color: #555;
       font-size: 0.95rem;
-      margin-bottom: 30px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
     .custom-file-upload {
       display: inline-block;
       background-color: #007bff;
       color: white;
-      padding: 10px 24px;
+      padding: 10px 20px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
@@ -69,6 +105,7 @@
     }
 
     .filename {
+      margin: 12px 0;
       font-size: 0.9rem;
       color: #333;
     }
@@ -79,7 +116,7 @@
       color: white;
       font-size: 1rem;
       font-weight: 600;
-      padding: 10px 24px;
+      padding: 10px 22px;
       border-radius: 8px;
       cursor: pointer;
       transition: background-color 0.3s;
@@ -89,65 +126,49 @@
       background-color: #218838;
     }
 
-    /* Result Card */
     .results-card {
       margin-top: 30px;
-      padding: 25px 20px;
-      background-color: #f9fbff;
-      border-radius: 14px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+      padding: 20px;
+      background-color: #f9f9ff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       text-align: left;
-      line-height: 1.7;
+      line-height: 1.6;
     }
 
     .results-card h3 {
       text-align: center;
-      margin-bottom: 20px;
-      color: #007bff;
-      font-size: 1.2rem;
+      margin-bottom: 15px;
+      color: #222;
     }
 
     .results-card p {
       font-size: 0.95rem;
-      margin: 8px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .results-card strong {
-      color: #222;
+      margin: 6px 0;
     }
 
     .status {
       font-weight: 600;
       color: #007bff;
-      margin-left: 10px;
     }
 
     .photo-section {
-      margin-top: 25px;
+      margin-top: 18px;
       text-align: center;
-    }
-
-    .photo-section h4 {
-      color: #333;
-      font-weight: 600;
-      margin-bottom: 10px;
     }
 
     .photo-section img {
       margin-top: 10px;
       max-width: 180px;
       border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
     }
 
     footer {
       text-align: center;
       font-size: 0.85rem;
       color: white;
-      padding: 14px;
+      padding: 15px;
       background: #007bff;
       border-top: 3px solid #0056b3;
       margin-top: auto;
@@ -155,19 +176,31 @@
 
     @media (max-width: 480px) {
       .container {
-        margin: 40px 16px;
+        margin: 50px 16px;
         padding: 30px 20px;
       }
 
-      .results-card {
-        padding: 20px 15px;
+      nav ul li {
+        margin-left: 15px;
       }
     }
   </style>
 </head>
+
 <body>
+  <!-- Navbar -->
+  <nav>
+    <div class="logo">Aadhaar Validator</div>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#instructions">Instructions</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Container -->
   <div class="container">
-    <h1>Aadhaar Card Verification System</h1>
+    <h1>Aadhaar Card Verification</h1>
     <p class="subtitle">Upload an Aadhaar card image for validation</p>
 
     {% if error %}
@@ -195,9 +228,9 @@
     {% if extracted %}
     <div class="results-card">
       <h3>Extracted Aadhaar Data</h3>
-      <p><strong>Aadhaar Number:</strong> <span>{{ extracted.aadhaar_number }}</span></p>
-      <p><strong>Name:</strong> <span>{{ extracted.name }}</span></p>
-      <p><strong>DOB:</strong> <span>{{ extracted.dob }}</span></p>
+      <p><strong>Aadhaar Number:</strong> {{ extracted.aadhaar_number }} — <span class="status">{{ validations.aadhaar_number }}</span></p>
+      <p><strong>Name:</strong> {{ extracted.name }} — <span class="status">{{ validations.name }}</span></p>
+      <p><strong>DOB:</strong> {{ extracted.dob }} — <span class="status">{{ validations.dob }}</span></p>
 
       {% if photo_image %}
       <div class="photo-section">
@@ -219,11 +252,14 @@
     const form = document.getElementById('uploadForm');
 
     fileInput.addEventListener('change', (e) => {
-      fileName.textContent = e.target.files.length > 0
-        ? `Uploaded File: ${e.target.files[0].name}`
-        : 'No file chosen';
+      if (e.target.files.length > 0) {
+        fileName.textContent = `Uploaded File: ${e.target.files[0].name}`;
+      } else {
+        fileName.textContent = 'No file chosen';
+      }
     });
 
+    // SweetAlert validation for empty input
     form.addEventListener('submit', function (e) {
       if (!fileInput.value) {
         e.preventDefault();
