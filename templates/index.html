@@ -3,14 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <title>Aadhaar Validator</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    /* Navbar Styles from 1.html */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f7f9fb;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #444;
+    }
+
+    /* Navbar */
     nav {
       background-color: #14A800;
       color: white;
@@ -19,30 +26,61 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      z-index: 10;
+      position: relative;
     }
-    nav .logo {
-      font-size: 1.3rem;
-      font-weight: 600;
-    }
-    nav ul {
-      list-style: none;
-      display: flex;
-      margin: 0;
-      padding: 0;
-    }
+    nav .logo { font-size: 1.3rem; font-weight: 600; }
+    nav ul { list-style: none; display: flex; margin: 0; padding: 0; }
     nav ul li { margin-left: 25px; }
-    nav ul li a {
-      color: white;
+    nav ul li a { color: white; text-decoration: none; font-weight: 500; transition: color 0.3s; }
+    nav ul li a:hover, nav ul li a.active { text-decoration: underline; color: #D7FFD9; }
+
+    /* Container */
+    .container {
+      flex: 1;
+      text-align: center;
+      margin: 100px 20px;
+    }
+    h1 { font-size: 2rem; color: #007bff; margin-bottom: 10px; }
+    .subtitle { font-size: 1.1rem; margin-bottom: 25px; color: #444; }
+    .filename { margin-top: 8px; font-size: 0.95rem; color: #666; }
+
+    /* Button base style with left-to-right hover animation */
+    .btn {
+      position: relative;
+      display: inline-block;
+      padding: 12px 28px;
+      font-weight: 600;
       text-decoration: none;
-      font-weight: 500;
+      color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 20px;
+      cursor: pointer;
+      background-color: #007bff; /* base blue */
+      z-index: 0;
       transition: color 0.3s;
     }
-    nav ul li a:hover, nav ul li a.active {
-      text-decoration: underline;
-      color: #D7FFD9;
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background-color: #e72828; /* hover red */
+      z-index: -1;
     }
+    .btn:hover::before {
+      animation: slideIn 0.5s forwards;
+    }
+    .btn:not(:hover)::before {
+      animation: slideOut 0.5s forwards;
+    }
+    @keyframes slideIn { 0% { left: -100%; } 100% { left: 0; } }
+    @keyframes slideOut { 0% { left: 0; } 100% { left: 100%; } }
 
-    /* Footer Styles from 1.html */
+    /* Footer */
     footer {
       text-align: center;
       font-size: 0.85rem;
@@ -51,6 +89,65 @@
       background: #14A800;
       border-top: 3px solid #0D7300;
       margin-top: 40px;
+    }
+
+    /* Results Card */
+    .results-card {
+      margin-top: 30px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .results-card h3 { margin-bottom: 15px; color: #007bff; }
+    .results-card p { margin: 8px 0; font-size: 1rem; }
+    .photo-section img { max-width: 150px; border-radius: 8px; margin-top: 10px; }
+
+    /* Floating Translate Button */
+    #translateBtn {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #14A800;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    #translateBtn:hover { background-color: #0D7300; }
+
+    /* Google Translate container */
+    #google_translate_element {
+      display: none;
+      position: fixed;
+      top: 140px;
+      left: 20px;
+      z-index: 1000;
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    #google_translate_element select {
+      width: 100%;
+      background: white;
+      color: #444;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -84,12 +181,12 @@
     {% endif %}
 
     <form id="uploadForm" action="/scan" method="post" enctype="multipart/form-data">
-      <label class="custom-file-upload">
+      <label class="btn">
         <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" required style="display:none;">
         Choose Aadhaar File
       </label>
       <p id="fileName" class="filename">No file chosen</p>
-      <button type="submit" id="scanButton">Scan Aadhaar</button>
+      <button type="submit" class="btn">Scan Aadhaar</button>
     </form>
 
     {% if extracted %}
@@ -127,7 +224,6 @@
       }
     });
 
-    // SweetAlert loading when scanning Aadhaar
     form.addEventListener('submit', function (e) {
       if (!fileInput.value) {
         e.preventDefault();
@@ -148,6 +244,13 @@
         });
       }
     });
+
+    const translateBtn = document.getElementById('translateBtn');
+    const translateElement = document.getElementById('google_translate_element');
+    translateBtn.addEventListener('click', () => {
+      translateElement.style.display = translateElement.style.display === 'block' ? 'none' : 'block';
+    });
   </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
