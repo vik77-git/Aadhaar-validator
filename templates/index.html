@@ -38,11 +38,25 @@
     /* Container */
     .container {
       flex: 1;
-      text-align: center;
-      margin: 100px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 50px 20px;
     }
-    h1 { font-size: 2rem; color: #007bff; margin-bottom: 10px; }
-    .subtitle { font-size: 1.1rem; margin-bottom: 25px; color: #444; }
+
+    /* Card */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px 35px; /* increased padding */
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2); /* stronger shadow */
+      max-width: 700px; /* increased max width */
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 { font-size: 2rem; color: #007bff; margin-bottom: 15px; }
+    .subtitle { font-size: 1.15rem; margin-bottom: 30px; color: #444; }
     .filename { margin-top: 8px; font-size: 0.95rem; color: #666; }
 
     /* Button base style with left-to-right hover animation */
@@ -71,12 +85,8 @@
       background-color: #e72828; /* hover red */
       z-index: -1;
     }
-    .btn:hover::before {
-      animation: slideIn 0.5s forwards;
-    }
-    .btn:not(:hover)::before {
-      animation: slideOut 0.5s forwards;
-    }
+    .btn:hover::before { animation: slideIn 0.5s forwards; }
+    .btn:not(:hover)::before { animation: slideOut 0.5s forwards; }
     @keyframes slideIn { 0% { left: -100%; } 100% { left: 0; } }
     @keyframes slideOut { 0% { left: 0; } 100% { left: 100%; } }
 
@@ -164,46 +174,48 @@
   </nav>
 
   <div class="container">
-    <h1>Aadhaar Card Verification System</h1>
-    <p class="subtitle">Upload an Aadhaar card image for validation</p>
+    <div class="card">
+      <h1>Aadhaar Card Verification System</h1>
+      <p class="subtitle">Upload an Aadhaar card image for validation</p>
 
-    {% if error %}
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: '{{ error }}',
-          confirmButtonColor: '#007bff'
+      {% if error %}
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '{{ error }}',
+            confirmButtonColor: '#007bff'
+          });
         });
-      });
-    </script>
-    {% endif %}
+      </script>
+      {% endif %}
 
-    <form id="uploadForm" action="/scan" method="post" enctype="multipart/form-data">
-      <label class="btn">
-        <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" required style="display:none;">
-        Choose Aadhaar File
-      </label>
-      <p id="fileName" class="filename">No file chosen</p>
-      <button type="submit" class="btn">Scan Aadhaar</button>
-    </form>
+      <form id="uploadForm" action="/scan" method="post" enctype="multipart/form-data">
+        <label class="btn">
+          <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" required style="display:none;">
+          Choose Aadhaar File
+        </label>
+        <p id="fileName" class="filename">No file chosen</p>
+        <button type="submit" class="btn">Scan Aadhaar</button>
+      </form>
 
-    {% if extracted %}
-    <div class="results-card">
-      <h3>Extracted Aadhaar Data</h3>
-      <p><strong>Aadhaar Number:</strong> {{ extracted.aadhaar_number }} — <span class="status">{{ validations.aadhaar_number }}</span></p>
-      <p><strong>Name:</strong> {{ extracted.name }} — <span class="status">{{ validations.name }}</span></p>
-      <p><strong>DOB:</strong> {{ extracted.dob }} — <span class="status">{{ validations.dob }}</span></p>
+      {% if extracted %}
+      <div class="results-card">
+        <h3>Extracted Aadhaar Data</h3>
+        <p><strong>Aadhaar Number:</strong> {{ extracted.aadhaar_number }} — <span class="status">{{ validations.aadhaar_number }}</span></p>
+        <p><strong>Name:</strong> {{ extracted.name }} — <span class="status">{{ validations.name }}</span></p>
+        <p><strong>DOB:</strong> {{ extracted.dob }} — <span class="status">{{ validations.dob }}</span></p>
 
-      {% if photo_image %}
-      <div class="photo-section">
-        <h4>Detected Photo</h4>
-        <img src="{{ photo_image }}" alt="Aadhaar Photo">
+        {% if photo_image %}
+        <div class="photo-section">
+          <h4>Detected Photo</h4>
+          <img src="{{ photo_image }}" alt="Aadhaar Photo">
+        </div>
+        {% endif %}
       </div>
       {% endif %}
     </div>
-    {% endif %}
   </div>
 
   <!-- Footer -->
@@ -226,7 +238,7 @@
 
     form.addEventListener('submit', function (e) {
       if (!fileInput.value) {
-        e.preventDefault(); // Stop form submission
+        e.preventDefault();
         Swal.fire({
           icon: 'warning',
           title: 'No file selected',
@@ -236,7 +248,7 @@
       } else {
         Swal.fire({
           title: 'Scanning Aadhaar...',
-          text: 'The file is being processed...',
+          text: 'The file is being processed. Please wait.',
           allowOutsideClick: false,
           didOpen: () => {
             Swal.showLoading();
