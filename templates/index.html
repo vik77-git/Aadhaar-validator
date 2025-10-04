@@ -4,40 +4,52 @@
   <meta charset="UTF-8">
   <title>Aadhaar Validator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-<div class="container">
-<h1>Aadhaar Card Verification System</h1>
-<p class="subtitle">Upload an Aadhaar card image for validation</p>
+  <div class="container" id="pageRoot">
+    <h1>Aadhaar Card Verification System</h1>
+    <p class="subtitle">Upload an Aadhaar card image for validation</p>
 
-{% if error %}
-<div class="results" style="border-left:4px solid #d32f2f;background:#fff6f6;padding:12px;margin-bottom:12px;">
-  <strong>Error:</strong> {{ error }}
-</div>
-{% endif %}
+    {% if error %}
+      <div class="results" style="border-left:4px solid #d32f2f; background:#fff6f6; padding:12px; margin-bottom:12px;">
+        <strong>Error:</strong> {{ error }}
+      </div>
+    {% endif %}
 
-<form id="uploadForm" action="/scan" method="post" enctype="multipart/form-data">
-  <label class="custom-file-upload">
-    <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" required>
-    📂 Choose Aadhaar File
-  </label>
-  <button type="submit" id="scanButton">🔍 Scan Aadhaar</button>
-</form>
-</div>
+    <form id="uploadForm" action="/scan" method="post" enctype="multipart/form-data">
+      <label class="custom-file-upload">
+        <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" required>
+        📂 Choose Aadhaar File
+      </label>
+      <button type="submit" id="scanButton">🔍 Scan Aadhaar</button>
+    </form>
+  </div>
 
-<footer>
-<p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
-</footer>
+  <footer>© 2025 Aadhaar Verification System | Secure Identity Validation</footer>
 
-<script>
-const fileInput=document.getElementById('fileInput');
-const form=document.getElementById('uploadForm');
-form.addEventListener('submit',(e)=>{
-  if(fileInput.files.length===0){e.preventDefault(); Swal.fire("Please choose a file"); return;}
-  Swal.fire({title:'Scanning Aadhaar...',allowOutsideClick:false,didOpen:()=>{Swal.showLoading();}});
-});
-</script>
+  <script>
+    // SweetAlert while scanning
+    const form = document.getElementById('uploadForm');
+    form.addEventListener('submit', (e) => {
+      const fileInput = document.getElementById('fileInput');
+      if (!fileInput || fileInput.files.length === 0) {
+        e.preventDefault();
+        Swal.fire("Error", "Please choose a file", "error");
+        return;
+      }
+      Swal.fire({ title: 'Scanning Aadhaar...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    });
+
+    // Post height to parent to let iframe resize
+    function postHeight(){
+      try {
+        const h = document.documentElement.scrollHeight || document.body.scrollHeight;
+        window.parent.postMessage({type:'height', height: h}, '*');
+      } catch(e){}
+    }
+    window.addEventListener('load', postHeight);
+    window.addEventListener('resize', postHeight);
+  </script>
 </body>
 </html>
