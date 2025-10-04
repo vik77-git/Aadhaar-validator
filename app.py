@@ -235,8 +235,8 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 def home():
     return render_template('home.html')
 
-@app.route('/scan')
-def scan_page():
+@app.route('/index')
+def index():
     return render_template('index.html')
 
 @app.route('/about')
