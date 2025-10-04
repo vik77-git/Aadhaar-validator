@@ -1,6 +1,6 @@
 ---
 title: Aadhaar Validator
-emoji: 🪪
+emoji: 💻
 colorFrom: blue
 colorTo: green
 sdk: docker
