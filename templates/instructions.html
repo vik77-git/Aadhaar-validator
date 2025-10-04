@@ -6,24 +6,75 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-    nav { background-color: #14A800; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    /* Navbar */
+    nav {
+      background-color: #14A800;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
     nav .logo { font-size: 1.3rem; font-weight: 600; }
     nav ul { list-style: none; display: flex; margin: 0; padding: 0; }
     nav ul li { margin-left: 25px; }
     nav ul li a { color: white; text-decoration: none; font-weight: 500; transition: color 0.3s; }
     nav ul li a:hover, nav ul li a.active { text-decoration: underline; color: #D7FFD9; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: white;
+      padding: 15px;
+      background: #14A800;
+      border-top: 3px solid #0D7300;
+      margin-top: 40px;
+    }
+
+    /* Page content */
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
     .content { flex: 1; text-align: center; margin: 100px 20px; }
     h1 { color: #14A800; font-size: 2rem; margin-bottom: 10px; }
-    p { color: #444; font-size: 1.05rem; max-width: 600px; margin: auto; line-height: 1.6; }
+    ul { max-width: 600px; margin: auto; text-align: left; line-height: 1.6; padding-left: 20px; }
+    li { margin-bottom: 10px; color: #444; font-size: 1.05rem; }
     .btn-next { display: inline-block; margin-top: 25px; background-color: #14A800; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: background-color 0.3s; }
     .btn-next:hover { background-color: #0D7300; }
-    footer { text-align: center; font-size: 0.85rem; color: white; padding: 15px; background: #14A800; border-top: 3px solid #0D7300; }
-    #google_translate_element { position: fixed; top: 80px; left: 20px; z-index: 1000; }
+
+    /* Google Translate custom button */
+    #translateBtn {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #14A800;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 1.3rem;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: background 0.3s;
+    }
+    #translateBtn:hover { background-color: #0D7300; }
+
+    #google_translate_element { display: none; position: fixed; top: 140px; left: 20px; z-index: 1000; background: #fff; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); padding: 10px; }
+    /* Hide the default banner iframe */
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+    body { top: 0 !important; }
   </style>
 </head>
 <body>
+
+  <!-- Navbar -->
   <nav>
     <div class="logo">Aadhaar Validator</div>
     <ul>
@@ -33,31 +84,42 @@
     </ul>
   </nav>
 
+  <!-- Google Translate Button -->
+  <button id="translateBtn" title="Choose Language">🌐</button>
   <div id="google_translate_element"></div>
 
   <div class="content">
     <h1>Instructions</h1>
     <ul>
-      <li><br>Ensure your Aadhaar card image is clear and readable.</li>
-      <li><br>Supported formats: JPG, JPEG, PNG.</li>
-      <li><br>Click the “Scan Aadhaar” button below to begin validation.</li>
+      <li>Ensure your Aadhaar card image is clear and readable.</li>
+      <li>Supported formats: JPG, JPEG, PNG.</li>
+      <li>Click the “Scan Aadhaar” button below to begin validation.</li>
     </ul>
     <a href="{{ url_for('index') }}" class="btn-next">Next →</a>
+  </div>
 
-
+  <!-- Footer -->
   <footer>
     © 2025 Aadhaar Validator | Secure Identity Validation
   </footer>
 
+  <!-- Google Translate Scripts -->
   <script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
         pageLanguage: 'en',
         includedLanguages: 'hi,ta,te,ml,kn,gu,bn,mr,pa,ur',
-        layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
       }, 'google_translate_element');
     }
 
+    // Toggle the dropdown visibility on button click
+    const translateBtn = document.getElementById('translateBtn');
+    const translateElement = document.getElementById('google_translate_element');
+    translateBtn.addEventListener('click', () => {
+      translateElement.style.display = translateElement.style.display === 'block' ? 'none' : 'block';
+    });
+  </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
