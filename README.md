@@ -6,24 +6,31 @@ colorTo: green
 sdk: docker
 app_file: app.py
 pinned: false
+license: apache-2.0
 ---
+# Aadhaar Validator 🔎
 
-# 🪪 Aadhaar Card Verification System (Flask)
-
-This Space is a **Flask-based web application** for validating Aadhaar cards using **YOLOv8 + Tesseract OCR**.  
-It automatically detects Aadhaar number, name, date of birth, and photo, then performs validation checks like **Verhoeff algorithm** for Aadhaar number and DOB correctness.
-
----
+A Flask web app that validates Aadhaar cards using YOLO detection + OCR.  
+It extracts Aadhaar Number, Name, DOB, and displays results neatly in a bordered card.  
 
 ## 🚀 Features
-- Upload Aadhaar card image (`.jpg`, `.jpeg`, `.png`)
-- YOLOv8 model detects Aadhaar card fields (number, name, DOB, photo)
-- OCR (Tesseract) extracts text from detected fields
-- Aadhaar number validated with **Verhoeff algorithm**
-- DOB validated for format, non-future, and age > 5 years
-- Extracted **photo crop** displayed separately
-- Professional responsive UI (HTML + CSS)
+- Upload Aadhaar image → detect Aadhaar number, name, DOB
+- YOLO model for detection (`best.pt`)
+- Extracted data shown in a professional bordered card
+- Cropped Aadhaar photo displayed neatly
+- SweetAlert pop-up ("Scanning Aadhaar...")
+- Clean UI with iframe embedding (hides Hugging Face navbar)
 
 ---
 
-## 🛠️ Project Structure
+## 📂 Project Structure
+See the tree above.
+
+---
+
+## ⚙️ Setup
+
+### 1. Clone the repo
+```bash
+git clone https://huggingface.co/spaces/username/aadhaar-validator
+cd aadhaar-validator
