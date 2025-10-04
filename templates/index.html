@@ -48,9 +48,9 @@
     .card {
       background: #fff;
       border-radius: 12px;
-      padding: 40px 35px; /* increased padding */
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2); /* stronger shadow */
-      max-width: 700px; /* increased max width */
+      padding: 40px 35px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      max-width: 700px;
       width: 100%;
       text-align: center;
     }
@@ -71,7 +71,7 @@
       overflow: hidden;
       margin-top: 20px;
       cursor: pointer;
-      background-color: #007bff; /* base blue */
+      background-color: #007bff;
       z-index: 0;
       transition: color 0.3s;
     }
@@ -82,7 +82,7 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background-color: #e72828; /* hover red */
+      background-color: #e72828;
       z-index: -1;
     }
     .btn:hover::before { animation: slideIn 0.5s forwards; }
@@ -121,8 +121,8 @@
       position: fixed;
       top: 80px;
       left: 20px;
-      width: 50px;
-      height: 50px;
+      width: 55px;
+      height: 55px;
       border-radius: 50%;
       background-color: #14A800;
       color: white;
@@ -137,16 +137,16 @@
     }
     #translateBtn:hover { background-color: #0D7300; }
 
-    /* Google Translate container */
+    /* Google Translate container round */
     #google_translate_element {
       display: none;
       position: fixed;
-      top: 140px;
+      top: 145px;
       left: 20px;
       z-index: 1000;
       background: white;
-      border-radius: 8px;
-      padding: 10px;
+      border-radius: 50px;
+      padding: 10px 15px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
     #google_translate_element select {
@@ -178,22 +178,9 @@
       <h1>Aadhaar Card Verification System</h1>
       <p class="subtitle">Upload an Aadhaar card image for validation</p>
 
-      {% if error %}
-      <script>
-        document.addEventListener("DOMContentLoaded", function() {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: '{{ error }}',
-            confirmButtonColor: '#007bff'
-          });
-        });
-      </script>
-      {% endif %}
-
       <form id="uploadForm" action="/scan" method="post" enctype="multipart/form-data">
         <label class="btn">
-          <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" required style="display:none;">
+          <input type="file" name="file" id="fileInput" accept=".jpg,.jpeg,.png" style="display:none;">
           Choose Aadhaar File
         </label>
         <p id="fileName" class="filename">No file chosen</p>
@@ -223,20 +210,20 @@
     © 2025 Aadhaar Validator | Secure Identity Validation
   </footer>
 
+  <!-- Google Translate Round Button -->
+  <button id="translateBtn" title="Choose Language">🌐</button>
+  <div id="google_translate_element"></div>
+
   <script>
     const fileInput = document.getElementById('fileInput');
     const fileName = document.getElementById('fileName');
     const form = document.getElementById('uploadForm');
 
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        fileName.textContent = `Uploaded File: ${e.target.files[0].name}`;
-      } else {
-        fileName.textContent = 'No file chosen';
-      }
+    fileInput.addEventListener('change', e => {
+      fileName.textContent = e.target.files.length > 0 ? `Uploaded File: ${e.target.files[0].name}` : 'No file chosen';
     });
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', e => {
       if (!fileInput.value) {
         e.preventDefault();
         Swal.fire({
@@ -250,13 +237,12 @@
           title: 'Scanning Aadhaar...',
           text: 'The file is being processed. Please wait.',
           allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
+          didOpen: () => Swal.showLoading()
         });
       }
     });
 
+    // Google Translate Toggle
     const translateBtn = document.getElementById('translateBtn');
     const translateElement = document.getElementById('google_translate_element');
     translateBtn.addEventListener('click', () => {
