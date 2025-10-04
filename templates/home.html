@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aadhaar Validator - Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <ul>
+      <li><a href="{{ url_for('home') }}" class="active">Home</a></li>
+      <li><a href="{{ url_for('about') }}">About</a></li>
+      <li><a href="{{ url_for('instructions') }}">Instructions</a></li>
+      <li><a href="{{ url_for('scan_page') }}">Scan Aadhaar</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h1>Welcome to Aadhaar Validator</h1>
+    <p class="subtitle">A secure prototype to validate Aadhaar details from uploaded images.</p>
+    <a href="{{ url_for('scan_page') }}" class="btn">Start Aadhaar Verification</a>
+  </div>
+
+  <footer>
+    <p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
+  </footer>
+</body>
+</html>
