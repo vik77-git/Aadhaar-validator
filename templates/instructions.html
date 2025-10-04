@@ -68,6 +68,7 @@
     }
     #translateBtn:hover { background-color: #0D7300; }
 
+    /* Google Translate dropdown */
     #google_translate_element {
       display: none;
       position: fixed;
@@ -87,6 +88,13 @@
       display: none !important;
     }
     body { top: 0 !important; }
+
+    /* Language icon SVG inside button */
+    #translateBtn svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
   </style>
 </head>
 <body>
@@ -101,8 +109,13 @@
     </ul>
   </nav>
 
-  <!-- Google Translate Button -->
-  <button id="translateBtn" title="Choose Language">🌐</button>
+  <!-- Google Translate Button with icon -->
+  <button id="translateBtn" title="Choose Language">
+    <!-- Language/translator SVG icon -->
+    <svg viewBox="0 0 24 24">
+      <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c4.96 0 9-4.03 9-9s-4.04-9-9-9zm0 2c1.31 0 2.52.42 3.5 1.12l-1.5 1.5c-.54-.32-1.18-.5-1.85-.5-1.65 0-3 1.35-3 3 0 .67.18 1.31.5 1.85l-1.5 1.5c-.7-.98-1.12-2.19-1.12-3.5 0-3.31 2.69-6 6-6zm0 12c-1.31 0-2.52-.42-3.5-1.12l1.5-1.5c.54.32 1.18.5 1.85.5 1.65 0 3-1.35 3-3 0-.67-.18-1.31-.5-1.85l1.5-1.5c.7.98 1.12 2.19 1.12 3.5 0 3.31-2.69 6-6 6z"/>
+    </svg>
+  </button>
   <div id="google_translate_element"></div>
 
   <div class="content">
@@ -125,19 +138,19 @@
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
         pageLanguage: 'en',
-        includedLanguages: 'hi,ta,te,ml,kn,gu,bn,mr,pa,ur,en',
+        includedLanguages: 'en,hi,ta,te,ml,kn,gu,bn,mr,pa,ur',
         layout: google.translate.TranslateElement.InlineLayout.SIMPLE
       }, 'google_translate_element');
     }
 
-    // Toggle the dropdown visibility on button click
+    // Toggle dropdown on button click
     const translateBtn = document.getElementById('translateBtn');
     const translateElement = document.getElementById('google_translate_element');
     translateBtn.addEventListener('click', () => {
       translateElement.style.display = translateElement.style.display === 'block' ? 'none' : 'block';
     });
 
-    // Continuously remove any Google floating iframes to prevent nav hiding
+    // Remove Google Translate iframes to prevent nav hide
     setInterval(() => {
       const iframe = document.querySelector('iframe.goog-te-banner-frame');
       if (iframe) iframe.style.display = 'none';
