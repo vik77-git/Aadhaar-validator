@@ -1,3 +1,7 @@
+/* Hide Hugging Face navbar completely */
+[data-testid="space-header"], header, nav {
+  display: none !important;
+}
 body {font-family:'Inter',sans-serif;margin:0;padding:0;background:#f4f6f8;color:#333;}
 .container {max-width:800px;margin:30px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.1);}
 h1{text-align:center;margin-bottom:20px;}
