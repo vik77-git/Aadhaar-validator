@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aadhaar Validator - Scan</title>
-  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <style>
-    /* Global layout */
     body {
       font-family: 'Inter', sans-serif;
       background-color: #f7f9fb;
@@ -52,10 +52,22 @@
       color: #D7FFD9;
     }
 
-    /* Main content */
+    /* Google Translate */
+    #google_translate_element {
+      position: fixed;
+      left: 15px;
+      top: 90px;
+      z-index: 999;
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Main container */
     .container {
       text-align: center;
-      margin-top: 80px;
+      margin-top: 100px;
       flex: 1;
     }
     h1 {
@@ -70,6 +82,7 @@
       margin: 10px auto 30px;
       line-height: 1.6;
     }
+
     .upload-box {
       background: white;
       border: 2px dashed #14A800;
@@ -121,6 +134,9 @@
     </ul>
   </nav>
 
+  <!-- Google Translate Widget -->
+  <div id="google_translate_element"></div>
+
   <div class="container">
     <h1>Aadhaar Card Scanner</h1>
     <p>Upload your Aadhaar image below and click “Scan” to validate it securely.</p>
@@ -134,8 +150,20 @@
   </div>
 
   <footer>
-    &copy; 2025 Aadhaar Validator. All rights reserved.
+    &copy; 2025 Aadhaar Validator | Secure Identity Verification
   </footer>
+
+  <script>
+    // Google Translate setup (only Indian languages)
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,hi,ta,te,kn,ml,mr,bn,gu,pa,ur',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+  </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
   <script>
     document.getElementById("scanBtn").addEventListener("click", function() {
