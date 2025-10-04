@@ -1,24 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Embed Aadhaar Validator</title>
-<style>
-body,html{margin:0;padding:0;height:100%}
-iframe{width:100%;border:none;border-radius:12px;height:1000px;}
-</style>
+  <meta charset="utf-8">
+  <title>Embed Aadhaar Validator</title>
+  <style> html,body{height:100%;margin:0} iframe{width:100%;border:none;border-radius:12px;} </style>
 </head>
 <body>
-<iframe src="https://huggingface.co/spaces/username/aadhaar_validator?__theme=light" id="aadhaarFrame"></iframe>
-<script>
-window.addEventListener('message',function(event){
-  if(event.origin.includes("huggingface.co")){
-    const data=event.data;
-    if(data.type==="height"&&data.height){
-      document.getElementById("aadhaarFrame").style.height=data.height+"px";
-    }
-  }
-});
-</script>
+  <iframe id="aadhaarFrame" src="https://huggingface.co/spaces/username/aadhaar-validator?__theme=light" scrolling="no"></iframe>
+
+  <script>
+    window.addEventListener('message', function(event){
+      if (typeof event.data === 'object' && event.data !== null && event.data.type === 'height' && event.data.height) {
+        var frame = document.getElementById('aadhaarFrame');
+        frame.style.height = event.data.height + 'px';
+      }
+    }, false);
+  </script>
 </body>
 </html>
