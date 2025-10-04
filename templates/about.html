@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>About - Aadhaar Validator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <ul>
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('about') }}" class="active">About</a></li>
+      <li><a href="{{ url_for('instructions') }}">Instructions</a></li>
+      <li><a href="{{ url_for('scan_page') }}">Scan Aadhaar</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h1>About Aadhaar Validator</h1>
+    <p>This system helps validate Aadhaar details securely using AI-based OCR and data extraction. It’s designed to demonstrate safe digital identity verification for research and prototype purposes.</p>
+  </div>
+
+  <footer>
+    <p>© 2025 Aadhaar Verification System | Secure Identity Validation</p>
+  </footer>
+</body>
+</html>
