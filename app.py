@@ -11,8 +11,6 @@ from PIL import Image
 from flask import Flask, request, render_template, url_for, redirect, send_from_directory
 from ultralytics import YOLO
 import pytesseract
-
-# ✅ Supabase imports
 from supabase import create_client, Client
 
 # ---------- CONFIG ----------
@@ -24,13 +22,12 @@ else:
 ROOT = os.path.dirname(__file__)
 MODEL_PATH = os.path.join(ROOT, "best.pt")
 
-# ✅ use /tmp instead of static/uploads (writable on Spaces)
 UPLOAD_FOLDER = os.path.join("/tmp", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 CLASS_MAP = {0: "aadhaar_card", 1: "aadhaar_number", 2: "dob", 3: "name", 4: "photo"}
 
-# ✅ Supabase setup (from env)
+# ---------- SUPABASE SETUP ----------
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "aadhaar-photos")
@@ -46,7 +43,7 @@ if SUPABASE_URL and SUPABASE_KEY:
 else:
     print("⚠️ Missing Supabase credentials in environment. Database/uploads will be skipped.", file=sys.stderr)
 
-# ---------- Verhoeff (Aadhaar) ----------
+# ---------- VERHOEFF ----------
 verhoeff_table_d = [
     [0,1,2,3,4,5,6,7,8,9],
     [1,2,3,4,0,6,7,8,9,5],
@@ -76,15 +73,13 @@ def verhoeff_check(num):
         c = verhoeff_table_d[c][verhoeff_table_p[i % 8][int(item)]]
     return c == 0
 
-# ---------- Utilities ----------
+# ---------- UTILITIES ----------
 ALLOWED_EXT = {"png", "jpg", "jpeg"}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
 
 def tesseract_ocr(img):
-    if not shutil.which(pytesseract.pytesseract.tesseract_cmd) and not shutil.which("tesseract"):
-        raise RuntimeError("Tesseract binary not found.")
     try:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     except Exception:
@@ -121,17 +116,16 @@ def validate_aadhaar(num):
     if len(digits) != 12: return "❌ Invalid length"
     return "✅ Valid" if verhoeff_check(digits) else "❌ Invalid (Verhoeff failed)"
 
-# ---------- Load YOLO ----------
+# ---------- LOAD YOLO ----------
 print("Loading YOLO model from:", MODEL_PATH)
-model = None
 try:
     model = YOLO(MODEL_PATH)
-    print("YOLO model loaded.")
+    print("✅ YOLO model loaded.")
 except Exception as e:
-    print("Warning: YOLO model not loaded:", e, file=sys.stderr)
     model = None
+    print("⚠️ YOLO model not loaded:", e)
 
-# ---------- Helpers ----------
+# ---------- IMAGE HELPERS ----------
 def pil_to_cv2(image: Image.Image):
     image = image.convert("RGB")
     arr = np.array(image)
@@ -149,12 +143,8 @@ def open_input_image(input_obj):
         return Image.open(io.BytesIO(input_obj))
     raise ValueError(f"Unsupported image input type: {type(input_obj)}")
 
-# ---------- Robust Supabase upload helper ----------
+# ---------- SUPABASE UPLOAD ----------
 def upload_to_supabase(local_path, orig_filename):
-    """
-    Upload the local file to Supabase storage with a unique name (to avoid conflicts)
-    and return the public URL (or None on failure).
-    """
     if not supabase:
         print("⚠️ Supabase not initialized -- skipping upload.")
         return None
@@ -162,36 +152,16 @@ def upload_to_supabase(local_path, orig_filename):
     unique_name = f"{uuid.uuid4().hex}_{os.path.basename(orig_filename)}"
     try:
         with open(local_path, "rb") as f:
-            # using upsert True to allow overwrite if necessary
-            # supabase-py accepted options dict in some versions. If this fails, it will raise and be caught.
-            try:
-                res = supabase.storage.from_(SUPABASE_BUCKET).upload(unique_name, f, {"upsert": True})
-                print("Supabase.storage.upload response:", repr(res))
-            except TypeError:
-                # some supabase-py versions expect only (path, fileobj) w/out options
-                f.seek(0)
-                res = supabase.storage.from_(SUPABASE_BUCKET).upload(unique_name, f)
-                print("Supabase.storage.upload response (no options):", repr(res))
-
-        # Get public URL (handle return-type variations)
+            res = supabase.storage.from_(SUPABASE_BUCKET).upload(unique_name, f, {"upsert": True})
         pub = supabase.storage.from_(SUPABASE_BUCKET).get_public_url(unique_name)
-        url = None
-        if isinstance(pub, dict):
-            # attempt common keys
-            url = pub.get("publicURL") or pub.get("publicUrl") or pub.get("url") or pub.get("public_url")
-        elif isinstance(pub, str):
-            url = pub
-        else:
-            # fallback to repr
-            url = repr(pub)
-
-        print("✅ Uploaded file public url:", url)
+        url = pub if isinstance(pub, str) else pub.get("publicURL") or pub.get("publicUrl")
+        print("✅ Uploaded file public URL:", url)
         return url
     except Exception as e:
         print("⚠️ Error uploading to Supabase:", e, file=sys.stderr)
         return None
 
-# ---------- Core processing (keeps your logic intact) ----------
+# ---------- MAIN PROCESS ----------
 def process_image_file(file_stream_or_path):
     try:
         pil_image = open_input_image(file_stream_or_path)
@@ -200,7 +170,6 @@ def process_image_file(file_stream_or_path):
 
     img = pil_to_cv2(pil_image)
     h, w = img.shape[:2]
-
     extracted = {"aadhaar_number": "", "dob": "", "name": "", "photo": ""}
 
     if model is None:
@@ -217,16 +186,10 @@ def process_image_file(file_stream_or_path):
             continue
         xyxy = boxes.xyxy.cpu().numpy()
         cls_ids = boxes.cls.cpu().numpy().astype(int)
-
         for (x1, y1, x2, y2), cls_id in zip(xyxy, cls_ids):
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-            x1, y1 = max(0, x1), max(0, y1)
-            x2, y2 = min(w - 1, x2), min(h - 1, y2)
-            if x2 <= x1 or y2 <= y1:
-                continue
             crop = img[y1:y2, x1:x2].copy()
             label = CLASS_MAP.get(int(cls_id), f"class_{cls_id}")
-
             if label == "aadhaar_number":
                 text = tesseract_ocr(crop)
                 digits = re.sub(r"[^0-9]", "", text)
@@ -243,8 +206,8 @@ def process_image_file(file_stream_or_path):
                 cv2.imwrite(out_photo, crop)
                 extracted["photo"] = rel_photo
 
+    # OCR fallback
     full_text = tesseract_ocr(img)
-
     if not extracted["aadhaar_number"]:
         m = re.search(r"\b\d{4}\s?\d{4}\s?\d{4}\b", full_text)
         if m:
@@ -270,28 +233,28 @@ def process_image_file(file_stream_or_path):
         "dob": validate_dob(extracted.get("dob")),
     }
 
+    # Annotated result
     ann_name = f"annotated_{uuid.uuid4().hex}.jpg"
     ann_path = os.path.join(UPLOAD_FOLDER, ann_name)
     annotated = img.copy()
     for r in results:
         for (x1, y1, x2, y2), cls_id in zip(r.boxes.xyxy.cpu().numpy(), r.boxes.cls.cpu().numpy().astype(int)):
-            x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-            cv2.rectangle(annotated, (x1, y1), (x2, y2), (50, 150, 255), 2)
-            cv2.putText(annotated, CLASS_MAP.get(cls_id, str(cls_id)), (x1, max(0, y1-6)),
+            cv2.rectangle(annotated, (int(x1), int(y1)), (int(x2), int(y2)), (50, 150, 255), 2)
+            cv2.putText(annotated, CLASS_MAP.get(cls_id, str(cls_id)), (int(x1), max(0, int(y1)-6)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (50, 150, 255), 2)
     cv2.imwrite(ann_path, annotated)
 
-    # ----------------- Supabase upload + insert (best-effort, debug logs) -----------------
+    # Upload photo to Supabase
     photo_url = None
     if extracted.get("photo"):
         local_photo = os.path.join(UPLOAD_FOLDER, extracted["photo"])
         print("Attempting to upload photo:", local_photo)
         photo_url = upload_to_supabase(local_photo, extracted["photo"])
-        print("photo_url result:", photo_url)
 
+    # Insert into Supabase
     try:
         if supabase:
-            validity_status = "Valid" if all(str(v).strip().startswith("✅") for v in validations.values()) else "Invalid"
+            validity_status = "Valid" if all(v.startswith("✅") for v in validations.values()) else "Invalid"
             record = {
                 "id": str(uuid.uuid4()),
                 "name": extracted.get("name"),
@@ -303,12 +266,12 @@ def process_image_file(file_stream_or_path):
                 "updated_at": datetime.utcnow().isoformat(),
                 "verified_at": datetime.utcnow().isoformat()
             }
-            print("Inserting record to Supabase:", record)
+            print("📄 Extracted data before insert:", extracted)
+            print("🧾 Inserting record to Supabase:", record)
             resp = supabase.table("verifications").insert([record]).execute()
-            print("Supabase insert response:", repr(resp))
+            print("✅ Supabase insert response:", repr(resp))
     except Exception as e:
         print("⚠️ Supabase DB insert failed:", e, file=sys.stderr)
-    # ------------------------------------------------------------------------------
 
     return {
         "extracted": extracted,
@@ -317,7 +280,7 @@ def process_image_file(file_stream_or_path):
         "photo": extracted.get("photo")
     }
 
-# ---------- Flask ----------
+# ---------- FLASK ----------
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -364,7 +327,6 @@ def scan_route():
         validations=result["validations"]
     )
 
-# ✅ Serve /tmp/uploads files
 @app.route("/uploads/<path:filename>")
 def serve_upload(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
