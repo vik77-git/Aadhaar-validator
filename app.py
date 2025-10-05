@@ -12,6 +12,11 @@ from flask import Flask, request, render_template, url_for, redirect, send_from_
 from ultralytics import YOLO
 import pytesseract
 
+# ---------- Supabase client ----------
+# Install with: pip install supabase
+# (if that fails: pip install supabase-py)
+from supabase import create_client, Client
+
 # ---------- CONFIG ----------
 if shutil.which("tesseract"):
     pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
@@ -111,6 +116,24 @@ try:
 except Exception as e:
     print("Warning: YOLO model not loaded:", e, file=sys.stderr)
     model = None
+
+# ---------- Supabase Configuration (SERVER SIDE) ----------
+# Provide SUPABASE_URL and SUPABASE_KEY via environment variables (recommended)
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+
+supabase: Client = None
+TABLE_NAME = "verifications"
+
+if SUPABASE_URL and SUPABASE_KEY:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("Supabase client initialized.")
+    except Exception as e:
+        supabase = None
+        print("Warning: could not initialize Supabase client:", e, file=sys.stderr)
+else:
+    print("Supabase credentials not provided. Database inserts will be skipped.")
 
 # ---------- Helpers ----------
 def pil_to_cv2(image: Image.Image):
@@ -264,6 +287,37 @@ def scan_route():
     result = process_image_file(save_path)
     if result.get("error"):
         return render_template("index.html", error=result["error"])
+
+    # ----------------- Supabase Insert (non-blocking best-effort) -----------------
+    # We do NOT change any logic or behavior of the existing flow.
+    # If supabase is configured, attempt to insert a record. Failures are logged, not raised.
+    try:
+        if supabase is not None:
+            extracted = result.get("extracted", {}) or {}
+            validations = result.get("validations", {}) or {}
+
+            # Determine overall validity: all validations start with ✅
+            validity = "Valid" if all(str(v).strip().startswith("✅") for v in validations.values()) else "Invalid"
+
+            photo_filename = result.get("photo")
+            photo_url = url_for("serve_upload", filename=photo_filename, _external=True) if photo_filename else None
+
+            record = {
+                "name": extracted.get("name"),
+                "aadhaar_no": extracted.get("aadhaar_number"),
+                "dob": extracted.get("dob"),
+                "photo_url": photo_url,
+                "validity": validity
+                # created_at/updated_at/verified_at are handled by DB defaults (now())
+            }
+
+            # Insert into Supabase table (verifications)
+            resp = supabase.table(TABLE_NAME).insert(record).execute()
+            print("Supabase insert response:", resp)
+    except Exception as e:
+        # Don't interrupt main flow if DB insert fails
+        print("Warning: Supabase insert failed:", e, file=sys.stderr)
+    # ------------------------------------------------------------------------------
 
     return render_template(
         "result.html",
