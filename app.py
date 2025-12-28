@@ -121,9 +121,9 @@ supabase: Client = None
 if SUPABASE_URL and SUPABASE_KEY:
     try:
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-        print("✅ Supabase client initialized.")
+        print("Supabase client initialized.")
     except Exception as e:
-        print("⚠️ Failed to initialize Supabase:", e, file=sys.stderr)
+        print("Failed to initialize Supabase:", e, file=sys.stderr)
 
 # ---------- Helper ----------
 def pil_to_cv2(image: Image.Image):
@@ -274,7 +274,7 @@ def scan_route():
             }
             supabase.table(TABLE_NAME).insert(record).execute()
     except Exception as e:
-        print("⚠️ Supabase insert/upload failed:", e, file=sys.stderr)
+        print("Supabase insert/upload failed:", e, file=sys.stderr)
 
     return render_template(
         "result.html",

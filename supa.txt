@@ -1,0 +1,28 @@
+Supa_aadhaar
+
+viK@aadhaar@7
+
+project url : https://ropvikumvhdlcfhtobyk.supabase.co 
+
+apikey : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvcHZpa3VtdmhkbGNmaHRvYnlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxMjY3MzIsImV4cCI6MjA3NDcwMjczMn0.dgGma3oP_uKum_YMOgXnWEwMNfnTVYZL80hdJ5DwK7o
+
+json : 
+
+
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = 'https://ropvikumvhdlcfhtobyk.supabase.co'
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+db pass: viK@aadhar@7
+
+anon key : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlwa2JsaXdteHRhYndqbXJrZG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2NTA1NDksImV4cCI6MjA3NTIyNjU0OX0.OFP8M0lcSLX_R9g6-fBkX72y2IM9ItmDVj1fuU-EqcU
+
+service role : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlwa2JsaXdteHRhYndqbXJrZG5iIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTY1MDU0OSwiZXhwIjoyMDc1MjI2NTQ5fQ.BaVgfuK0W4MoSG-HBbXbsb4Jr6K2SvDRwb-QsGxQn7g
+
+project url : https://ipkbliwmxtabwjmrkdnb.supabase.co
+
+
+
